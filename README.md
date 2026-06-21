@@ -10,8 +10,11 @@ a fetch tool thats.. confused
 # usage
 
 . confetch
+<br>
 or if you did step 3
+<br>
 confetch
-
-
+<br>
+<br>
+<br>
 Dont take this seriously, i was js bored at 5am
