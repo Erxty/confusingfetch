@@ -1,66 +1,113 @@
 #!/bin/sh
 
+# This fetch never lies, so you should always trust it.
+# No need to edit this file unless yuore STUPID and want it to break.
+
+white=$(printf '\033[37m')
+bold=$(printf '\033[1m')
+reset=$(printf '\033[0m')
+
+purple=$(printf '\033[35m')
+blue=$(printf '\033[34m')
+cyan=$(printf '\033[36m')
+green=$(printf '\033[32m')
+yellow=$(printf '\033[33m')
+orange=$(printf '\033[38;5;208m')
+red=$(printf '\033[31m')
+
+logo1="      .--.     "
+logo2="     |o_o |    "
+logo3="     |:_/ |    "
+logo4="    //   \\ \\   "
+logo5="   (J     l )  "
+logo6="  /'\_   _/'\\  "
+logo7="  \___)=(___/  "
+
 uptime=$(cut -d' ' -f1 /proc/uptime | cut -d'.' -f1)
 uptime_minutes=$(( $uptime / 60 ))
+uptime_hours=$(( $uptime_minutes / 60 ))
 
-echo $USER'@'$HOSTNAME
+distro=$(grep "^NAME=" /etc/os-release)
 
-echo "    .--."
-echo "   |o_o |"
-echo "   |:_/ |"
-echo "  //   \\ \\"
-echo " (j     l )"
-echo "/'\_   _/'\\"
-echo "\___)=(___/"
+uptime=$(
+	if [ "$uptime_hours" -ge 10 ]; then
+		echo "${green}ew get off your computer wtf.${reset} Youve been on for ${uptime_hours} h"
+	elif [ "$uptime_hours" -ge 5 ]; then
+		echo "${green}go touch some grass, ok?${reset} ${uptime_hours} h"
+	elif [ "$uptime_hours" -ge 1 ]; then
+		echo "${green}keep on using that computer, computer boy.${reset} ${uptime_minutes} min"
+	elif [ "$uptime_minutes" -ge 30 ]; then
+		echo "${green}wow, not too much, huh?${reset} ${uptime_minutes} min"
+	else 
+		echo "${green}computah, make this guy super gay, horny, and addicted to their pc.${reset} ${uptime_minutes} min"
+	fi
+)
 
-echo '
-shitty os btw'
-grep "^NAME=" /etc/os-release
+packages=$(ls -1 /bin/ | wc -l)
+package_high=$(($packages * 10 / 12))
+package_low=$(($packages * 16 / 10))
+packages_estimate="${package_low} to ${package_high}"
+
+terminal=$(
+	if [ $TERM = foot ]; then
+			echo "${purple}ew you like feet? wtf. term${reset} = ew im not saying that" 
+		elif [ $TERM = kitty ]; then
+			echo "${purple}oh i love cats too! term${reset} = cat"
+		elif [ $TERM = urxvt ]; then
+			echo "${purple}the best x11 term btw. term${reset} = " $TERM
+		else 
+			echo "${purple}term${reset} =" $TERM
+	fi	
+)
+
+# couldnt figure out a way to get ts
+wm="something niche probably"
+
+hostname=$(cat /proc/sys/kernel/hostname)
+
+echo "  sudo apt ddos" ${green}$USER${reset}'@'${green}$hostname${reset}
+
+echo "$logo1" "${red}shitty distro btw${reset} = " $distro
+
+echo "$logo2" "${orange}a.. colonel sanders? what? idk${reset} = $(uname -r)"
+
+echo "$logo3" "${yellow}window manager${reset} = " $wm
+
+echo "$logo4" $uptime
+
+echo "$logo5" "${cyan}mirror, mirror on the wall, how many packages do i have?${reset} = " $packages_estimate
+
+echo "$logo6" "${blue}like.. a seashell?${reset} = " $SHELL
+
+echo "$logo7" $terminal
+
 echo ''
 
-echo 'also the colonel sanders?'
-uname -r
+space="               "
+ram=$(grep MemTotal /proc/meminfo | tr -s ' ' | cut -d' ' -f2)
+ram_B=$(( $ram * 1000 ))
+ram_GB=$(( $ram / 1000000 ))
+ram_conclusion=$(
+	if [ $ram_GB -ge 64 ]; then
+			echo $ram_B "Bytes??? Holy shit are you a datacenter?"
+		elif [ $ram_GB -ge 32 ]; then
+			echo $ram_B "Bytes.. damn thats quite a bit man.. leave the windows(11) open"
+		elif [ $ram_GB -ge 16 ]; then
+			echo $ram_B "Bytes, meh pretty average"
+		elif [ $ram_GB -ge 8 ]; then
+			echo $ram_B "Bytes, you better hope GTA6 never releases"
+		else
+			echo $ram_B "Bytes only..? We all think you deserve some more man"
+	fi
+)
 
-if [ $uptime -gt 100000 ]; then
-	echo "ew get off your computer wtf. Youve been on for ${uptime_minutes} min"
-elif [ $uptime -gt 50000 ]; then
-	echo "go touch some grass, ok? ${uptime_minutes} min"
-elif [ $uptime -gt 10000 ]; then
-	echo "keep on using that computer, computer boy. ${uptime_minutes} min"
-elif [ $uptime -gt 1000 ]; then
-	echo "wow, not too much, huh? ${uptime_minutes} min"
-else 
-	echo "computah, make this guy super gay, horny, 
-	  and addicted to their pc. ${uptime_minutes} min"
-fi
+echo "  well ${cyan}specs${reset}. I suppose ik what those are"
 
-echo '
-package amount or atleast close enough'
-ls -1 /bin/ | wc -l
+echo "$space" "${yellow}cpu${reset} = $(uname -p)"
 
-echo '
-sudo apt ddos' $USER
+echo "$space" "${blue}ai food${reset} =" $ram_conclusion
 
-echo '
-some random sea'$SHELL' found on the deepweb'
+# also didnt figure this out
+echo "$space" "${purple}gpu${reset} = you dont have one you poor bastard"
 
-echo ''
-
-if [ $TERM = foot ]; then
-	echo 'ew you like feet? wtf. term = ew im not saying that'
-elif [ $TERM = kitty ]; then
-	echo 'oh i love cats too! term = cat'
-elif [ $TERM = urxvt ]; then
-	echo 'the best x11 term btw. term = ' $TERM
-else
-	echo 'term =' $TERM
-fi
-
-echo '
-well specs. I suppose ik what that is'
-
-echo "cpu=$(uname -p)"
-
-echo "ram=$(grep MemTotal /proc/meminfo | tr -s ' ' | cut -d' ' -f2) KB"
-
-echo "gpu=you dont have one you poor bastard"
+# Ik its badly made btw
