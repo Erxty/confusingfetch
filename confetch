@@ -16,7 +16,7 @@ orange=$(printf '\033[38;5;208m')
 red=$(printf '\033[31m')
 
 logo1="      .--.     "
-logo2="     |o_o |    "
+logo2="     |X_X |    "
 logo3="     |:_/ |    "
 logo4="    //   \\ \\   "
 logo5="   (J     l )  "
@@ -30,18 +30,20 @@ space="               "
 cpu=$( cat /proc/cpuinfo | grep -m 1 'model name' | cut -d':' -f 2 )
 
 packages=$(
-	if command -v apt > /dev/null 2>&1; then
-	   apt list --installed | wc -l
-	elif command -v dnf > /dev/null 2>&1; then
-	   dnf list installed | wc -l
-	elif command -v zypper > /dev/null 2>&1; then
-	   zypper search -i | wc -l
+	if command -v apt-get > /dev/null 2>&1; then
+	   dpkg-query -f '.\n' -W | wc -l
 	elif command -v pacman > /dev/null 2>&1; then
 	   pacman -Qq | wc -l
+	elif command -v dnf > /dev/null 2>&1; then
+	   rpm -qa --queryformat '.\n' | wc -l
+	elif command -v zypper > /dev/null 2>&1; then
+	   rpm -qa --queryformat '.\n' | wc -l
 	elif command -v xbps-query > /dev/null 2>&1; then
 		xbps-query -l | wc -l
 	elif command -v emerge > /dev/null 2>&1; then
-		equery list '*' | wc -l
+		ls /var/db/pkg/*/* -d | wc -l
+	elif command -v apk > /dev/null 2>&1; then
+		apk info | wc -l
 	else
 	   echo "fuckahh why would i know"
 	fi
@@ -54,15 +56,15 @@ uptime_minutes=$(( $uptime_seconds / 60 ))
 uptime_hours=$(( $uptime_minutes / 60 ))
 uptime=$(
 	if [ "$uptime_hours" -ge 10 ]; then
-		echo "${green}${bold}ew get off your computer wtf.${reset} Youve been on for ${uptime_hours} h"
+		echo "${purple}${bold}ew get off your computer wtf.${reset} Youve been on for ${uptime_hours} h"
 	elif [ "$uptime_hours" -ge 5 ]; then
-		echo "${green}${bold}go touch some grass, ok?${reset} ${uptime_hours} h"
+		echo "${purple}${bold}go touch some grass, ok?${reset} ${uptime_hours} h"
 	elif [ "$uptime_hours" -ge 1 ]; then
-		echo "${green}${bold}keep on using that computer, computer boy.${reset} ${uptime_minutes} min"
+		echo "${purple}${bold}keep on using that computer, computer boy.${reset} ${uptime_minutes} min"
 	elif [ "$uptime_minutes" -ge 30 ]; then
-		echo "${green}${bold}wow, not too much, huh?${reset} ${uptime_minutes} min"
+		echo "${purple}${bold}wow, not too much, huh?${reset} ${uptime_minutes} min"
 	else 
-		echo "${green}${bold}computah, make this guy super gay, horny, and addicted to their pc.${reset} ${uptime_minutes} min"
+		echo "${purple}${bold}computah, make this guy super gay, horny, and addicted to their pc.${reset} ${uptime_minutes} min"
 	fi
 )
 
@@ -98,18 +100,18 @@ ram_conclusion=$(
 
 echo "  sudo apt ddos" ${green}${bold}$USER${reset}'@'${green}${bold}$hostname${reset}
 
-echo "$logo1" "${red}${bold}shitty distro btw${reset} = " $distro
+echo "$logo1" "${purple}${bold}shitty distro btw${reset} = " $distro
 
-echo "$logo2" "${orange}${bold}a.. colonel sanders? what? idk${reset} = $(uname -r)"
+echo "$logo2" "${purple}${bold}a.. colonel sanders? what? idk${reset} = $(uname -r)" 
 
 # how do i do this one 
-echo "$logo3" "${yellow}${bold}managing windows 11${reset} = " $wm
+echo "$logo3" "${purple}${bold}windows 11 manager${reset} = " $wm
 
 echo "$logo4" $uptime
 
-echo "$logo5" "${cyan}${bold}aliexpress packages${reset} = prolly like" $packages_low 'to' $packages_high
+echo "$logo5" "${purple}${bold}aliexpress packages${reset} = prolly like" $packages_low 'to' $packages_high
 
-echo "$logo6" "${blue}${bold}like.. a seashell?${reset} = " $SHELL
+echo "$logo6" "${purple}${bold}like.. a seashell?${reset} = " $SHELL
 
 echo "$logo7" $terminal
 
@@ -117,11 +119,11 @@ echo ''
 
 echo "  well ${cyan}specs${reset}.. I suppose ik what those are"
 
-echo "$space" "${yellow}cpu${reset} =" $cpu
+echo "$space" "${blue}cpu${reset} =" $cpu
 
 echo "$space" "${blue}ai food${reset} =" $ram_conclusion
 
 # havent figured out how to do this yet
-echo "$space" "${purple}gpu${reset} = you dont have one you poor bastard"
+echo "$space" "${blue}gpu${reset} = you dont have one you poor bastard"
 
 # Ik its badly made btw
