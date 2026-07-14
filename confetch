@@ -3,7 +3,7 @@
 # This fetch never lies, so you should always trust it.
 # No need to edit this file unless yuore STUPID and want it to break.
 
-version="1.4"
+version="1.5"
 
 white=$(printf '\033[37m')
 bold=$(printf '\033[1m')
@@ -28,15 +28,16 @@ accentcolour="$red"
 # distro=$( grep PRETTY_NAME /etc/os-release | tr -d "'" | tr -d '"' | cut -d '=' -f2 )
 . /etc/os-release
 distro=$PRETTY_NAME
+distroShort=$NAME
 
 # this is for changing the logo
-# currently there are tux, debian, void, arch, nix, fedora, alpine, dragonfly, suse, and trash (fallback)
+# currently there are tux, debian, void, arch, nix, fedora, slackware, alpine, dragonfly, suse, and trash (fallback)
 # i dont plan on making logos for minor distros that are just forks.
 # this includes distros like mint, artix, pop, ubuntu, cachy, zorin, endeavor, etc.
 logooption="$distro"
 
-# past here is where the ugly ugly magic happens. Do NOT go further unless youre me or god
-# when writing this, only me and god knew what i was writing. Now only i know
+# past here is where the ugly ugly magic happens. Do NOT go further unless youre me.
+# when writing this, only me and god knew what i was writing. Now only i know.
 
 colouroption() {
     case "$2" in
@@ -54,8 +55,14 @@ colouroption() {
     esac
 }
 
+set_auto_colour() {
+    [ "$keycolour" = "auto" ] && keycolour=$1
+    [ "$keycolour2" = "auto" ] && keycolour2=$1
+}
+
 randomlogo() {
-	num=$(( $(cut -d' ' -f 1 /proc/uptime | cut -d'.' -f 1) % 11 ))
+	read -r up _ < /proc/uptime
+	num=$(( ${up%%.*} % 11 ))
 			
 	case "$num" in
     	0) logooption="tux" ;;
@@ -138,6 +145,7 @@ while [ $# -gt 0 ]; do
 			;;
 		--larp|-L)
 			logooption="$2"
+			distroShort="$2"
 			distro="$2"
 			shift 2
 			;;
@@ -156,19 +164,21 @@ while [ $# -gt 0 ]; do
 			shift
 			;;
 		--help|-h)
-			echo
-			echo "  Usage: confetch [options]"
-			echo
-			echo "    -h, --help FLAG | helps you out"
-			echo "    -v, --version | prints the version"
-			echo "    -l, --logo NAME | well wtf do you THINK it does, huh??"
-			echo "    -a, --accent COLOUR | changes your accent irl"
-			echo "    -k, --key COLOUR | changes your house keys"
-			echo "    -K, --key2 COLOUR | changes your other house keys"
-			echo "    -C, --confused | confuses you"
-			echo "    -N, --not-confused | removes all the jokes (why would you do that)"
-			echo "    -L. --larp NAME | sudo W opsec. Larpity larp"
-			echo
+			cat <<EOF
+			
+  Usage: confetch [options]
+
+    -h, --help FLAG       | helps you out
+    -v, --version         | prints the version
+    -l, --logo NAME       | well wtf do you THINK it does, huh??
+    -a, --accent COLOUR   | changes your accent irl
+    -k, --key COLOUR      | changes your house keys
+    -K, --key2 COLOUR     | changes your other house keys
+    -C, --confused        | confuses you
+    -N, --not-confused    | removes all the jokes (why would you do that)
+    -L. --larp NAME       | sudo W opsec. Larpity larp
+
+EOF
 			helpoptions "$2"
 			echo
 			exit 0
@@ -198,17 +208,17 @@ case "$logooption" in
 		logo4="${bold}${green}  |   ${reset}${bold}| @ |${green}   | "
 		logo5="${bold}${green}   $   ${reset}${bold}\_/${green}   $  "
 		logo6="${bold}${green}    \_          "
-		logo7="${bold}${green}      *###*     "
+		logo7="${bold}${green}      *###*\`    "
 		space="                "
 		;;
 	*[Dd]ebian*)
-		logo1="${bold}${red}     ______   "
-		logo2="${bold}${red}    /  __  \  "
-		logo3="${bold}${red}   /  /  \  | "
-		logo4="${bold}${red}  |  |     /  "
-		logo5="${bold}${red}   \  '-_-'   "
-		logo6="${bold}${red}    \         "
-		logo7="${bold}${red}     '-__     "
+		logo1="${bold}${red}     ______    "
+		logo2="${bold}${red}    /  __  \   "
+		logo3="${bold}${red}   /  /  \  |  "
+		logo4="${bold}${red}  |  |     /   "
+		logo5="${bold}${red}   \  '-_-'    "
+		logo6="${bold}${red}    \          "
+		logo7="${bold}${red}     '-__      "
 		space="              "
 		;;
 	*[Aa]rch*)
@@ -242,14 +252,14 @@ case "$logooption" in
 		space="                  "
 		;;
 	*[Nn]ix*)
-		logo1="${bold}${blue}      \\\   ${cyan}\\\ //    "
-		logo2="${bold}${blue}    /=======${cyan}\\\/     "
-		logo3="${bold}${cyan}     //      \\\ ${blue}//  "
-		logo4="${bold}${cyan}  /=//${blue}        //==/ "
-		logo5="${bold}${cyan}   //${blue}\\\      //     "
-		logo6="${bold}${blue}      \\\ ${cyan}=======/   "
-		logo7="${bold}${blue}     //\\\ ${cyan}    \\\    "
-		space="                    "
+		logo1="${bold}${blue}    _**___${cyan}/\/\     "
+		logo2="${bold}${blue}   I______${cyan}\  /${blue}__   "
+		logo3="${bold}${cyan}    _/ /   \ ${blue}/ /   "
+		logo4="${bold}${cyan}   /  <    ${blue} > _/   "
+		logo5="${bold}${cyan}   /_/ ${blue}\\${cyan}___${blue}/${cyan}_${blue}/${cyan}_    "
+		logo6="${bold}${blue}     /  \\${cyan}___  _I   "
+		logo7="${bold}${blue}     \/\/ ${cyan}  **     "
+		space="                   "
 		;;
 	*[Aa]lpine*)
 		logo1="${bold}${blue}        __            "
@@ -281,6 +291,16 @@ case "$logooption" in
 		logo7="${bold}${green}  --.,,,.----*'     "
 		space="                    "
 		;;
+	*[Ss]lack*)
+		logo1="${bold}${blue}     ,-*##\$##*-,     "
+		logo2="${bold}${blue}    /  ${reset}${bold},'\`\`'*I${blue}  \    "
+		logo3="${bold}${blue}   $   ${reset}${bold}\`~--._${blue}    $   "
+		logo4="${bold}${blue}  |[         ${reset}${bold}\`)${blue}  ]|  "
+		logo5="${bold}${blue}   $  ${reset}${bold},I*.__.*\`${blue}  $   "
+		logo6="${bold}${blue}    \ ${reset}${bold}|--------${blue} /    "
+		logo7="${bold}${blue}     '-*##\$##*-'     "
+		space="                     "
+		;;
 	*)
 		# this is a trash can btw
 		logo1="${bold}  ___________  "
@@ -296,95 +316,75 @@ esac
 
 case "$distro" in 
 	*[Vv]oid*)
-		distroecho="$USER fell out of the world"
-		if [ "$keycolour" = "auto" ]; then
-			keycolour="$green"
-		fi
-		if [ "$keycolour2" = "auto" ]; then
-			keycolour2="$green"
-		fi
+		distroecho="$USER died to the void"
+		set_auto_colour "$green"
 		;;
 	*[Aa]rch*)
 		distroecho="too minimal for the average, not minimal enough for the experienced"
-		if [ "$keycolour" = "auto" ]; then
-			keycolour="$blue"
-		fi
-		if [ "$keycolour2" = "auto" ]; then
-			keycolour2="$blue"
-		fi
+		set_auto_colour "$blue"
 		;;
 	*[Dd]ebian*)
 		distroecho="packages from the jurassic period lol"
-		if [ "$keycolour" = "auto" ]; then
-			keycolour="$red"
-		fi
-		if [ "$keycolour2" = "auto" ]; then
-			keycolour2="$red"
-		fi
+		set_auto_colour "$red"
 		;;
 	*[Gg]entoo*)
 		distroecho="have a lot of freetime, yeah?"
-		if [ "$keycolour" = "auto" ]; then
-			keycolour="$purple"
-		fi
-		if [ "$keycolour2" = "auto" ]; then
-			keycolour2="$purple"
-		fi
+		set_auto_colour "$purple"
 		;;
 	*[Ff]edora*)
 		distroecho="test rabbit for RHEL"
-		if [ "$keycolour" = "auto" ]; then
-			keycolour="$blue"
-		fi
-		if [ "$keycolour2" = "auto" ]; then
-			keycolour2="$blue"
-		fi
+		set_auto_colour "$blue"
 		;;
 	*[Nn]ix*)
 		distroecho="soystemd land"
-		if [ "$keycolour" = "auto" ]; then
-			keycolour="$cyan"
-		fi
-		if [ "$keycolour2" = "auto" ]; then
-			keycolour2="$cyan"
-		fi
+		set_auto_colour "$cyan"
 		;;
 	*[Aa]lpine*)
 		distroecho="im musling it"
-		if [ "$keycolour" = "auto" ]; then
-			keycolour="$blue"
-		fi
-		if [ "$keycolour2" = "auto" ]; then
-			keycolour2="$blue"
-		fi
+		set_auto_colour "$blue"
 		;;
 	*[Ss]use*)
 		distroecho="fedora EU edition"
-		if [ "$keycolour" = "auto" ]; then
-			keycolour="$green"
-		fi
-		if [ "$keycolour2" = "auto" ]; then
-			keycolour2="$green"
-		fi
+		set_auto_colour "$green"
+		;;
+	*[Ss]lack*)
+		distroecho="okay grandpa"
+		set_auto_colour "$blue"
 		;;
 	*)
-		distroecho="ay i dont support this! Stop using confetch!!"
-		if [ "$keycolour" = "auto" ]; then
-			keycolour="$red"
-		fi
-		if [ "$keycolour2" = "auto" ]; then
-			keycolour2="$blue"
-		fi
+		distroecho="ay this isnt supported! Stop using confetch!!"
+		set_auto_colour "$red"
 		;;
 esac
 	
 
 wm="something niche probably"
+
 hostname=$(hostname)
-cpu=$( grep -m 1 'model name' /proc/cpuinfo | cut -d':' -f 2 )
-gpu="im not even gonna lie, i cant fetch gpus yet"
-sea=$( basename "$SHELL" )
+
+cpu=$(awk -F ': ' '/model name*:*/{print $2; exit}' /proc/cpuinfo)
+
+gpuNumber=$(lspci | grep VGA | awk '{print $1; exit}')
+
+echo "$gpuNumber"
+
+gpu=$(lspci -v -s "${gpuNumber}" | awk -F': ' '/Subsystem:/{print $2}')
+[ -z "$gpu" ] && gpu=$(lspci -mm -s 07:00.0 | awk -F'"' '{print $6}' | cut -d'[' -f1)
+
+echo "$gpu"
+
+sea="${SHELL##*/}"
+
 krnl=$(uname -r)
+
+case "$WAYLAND_DISPLAY" in
+    "")
+        server=X11
+        ;;
+    *)
+        server=Wayland
+        ;;
+esac
 
 packages=$(
 	if command -v apt-get > /dev/null 2>&1; then
@@ -416,7 +416,8 @@ else
 	packages="stop using a niche distro ya bum"
 fi
 
-uptime_seconds=$( cut -d' ' -f 1 /proc/uptime | cut -d'.' -f 1 )
+read -r uptime _ < /proc/uptime
+uptime_seconds=${uptime%%.*}
 uptime_minutes=$(( $uptime_seconds / 60 ))
 uptime_hours=$(( $uptime_minutes / 60 ))
 uptime=$(
@@ -450,19 +451,24 @@ terminal=$(
 	esac	
 )
 
-ram=$( grep MemTotal /proc/meminfo | tr -s ' ' | cut -d' ' -f 2 )
+while read -r key value unit; do
+    [ "$key" = "MemTotal:" ] && {
+        ram=$value
+        break
+    }
+done < /proc/meminfo
 ram_B=$(( ram * 1000 ))
 ram_GB=$(( ram / 1000000 ))
 ram_conclusion=$(
 	if [ "$ram_GB" -ge 63 ]; then
-			echo "$ram_B" "Bytes??? Holy shit are you a datacenter?"
-		elif [ "$ram_GB" -ge 31 ]; then
-			echo "$ram_B" "Bytes.. damn thats quite a bit man.. leave the windows(11) open"
-		elif [ "$ram_GB" -ge 15 ]; then
-			echo "$ram_B" "Bytes, meh pretty average"
-		elif [ "$ram_GB" -ge 7 ]; then
-			echo "$ram_B" "Bytes, you better hope GTA6 never releases"
-		else
+		echo "$ram_B" "Bytes??? Holy shit are you a datacenter?"
+	elif [ "$ram_GB" -ge 31 ]; then
+		echo "$ram_B" "Bytes.. damn thats quite a bit man.. leave the windows(11) open"
+	elif [ "$ram_GB" -ge 15 ]; then
+		echo "$ram_B" "Bytes, meh pretty average"
+	elif [ "$ram_GB" -ge 7 ]; then
+		echo "$ram_B" "Bytes, you better hope GTA6 never releases"
+	else
 			echo "$ram_B" "Bytes only..? We all think you deserve some more man"
 	fi
 )
@@ -479,32 +485,19 @@ if [ "$not_confused" = "1" ]; then
 	gpu="rtx half life 3 ready 9090"
 fi
 
-echo "  sudo apt ddos" "${accentcolour}${bold}$USER${reset}@${accentcolour}${bold}$hostname${reset}"
-
-echo "$logo1" "${keycolour}${bold}${distroecho}${reset} =" "${distro} user BTW"
-
-# how do i do this one 
-echo "$logo2" "${keycolour}${bold}window manager${reset} =" "$wm"
-
-echo "$logo3" "${keycolour}${bold}like.. a seashell?${reset} =" "$sea"
-
-echo "$logo4" "${keycolour}${bold}highest ranking non-General grade officer${reset} =" "$krnl" 
-
-echo "$logo5" "$uptime"
-
-echo "$logo6" "${keycolour}${bold}aliexpress packages${reset} =" "$packages"
-
-echo "$logo7" "$terminal"
-
-echo ''
-
-echo "  well ${accentcolour}specs${reset}.. I suppose ik what those are"
-
-echo "$space" "${keycolour2}cpu${reset} =" "$cpu"
-
-echo "$space" "${keycolour2}ai food${reset} =" "$ram_conclusion"
-
-# could technically do this, but i dont like the output it gives for my gpu
-echo "$space" "${keycolour2}gpu${reset} =" "$gpu"
+cat <<EOF
+  sudo apt ddos ${accentcolour}${bold}$USER${reset}@${accentcolour}${bold}$hostname${reset}
+$logo1 ${keycolour}${bold}${distroecho}${reset} = ${distroShort} user BTW
+$logo2 ${keycolour}${bold}window manager${reset} = $wm ($server)
+$logo3 ${keycolour}${bold}like.. a seashell?${reset} = $sea
+$logo4 ${keycolour}${bold}highest ranking non-General grade officer${reset} = $krnl
+$logo5 $uptime
+$logo6 ${keycolour}${bold}aliexpress packages${reset} = $packages
+$logo7 $terminal
+  well ${accentcolour}specs${reset}.. I suppose ik what those are"
+$space ${keycolour2}cpu${reset} = $cpu
+$space ${keycolour2}gpu${reset} = $gpu
+$space ${keycolour2}ai food${reset} = $ram_conclusion
+EOF
 
 # Ik its badly made btw
