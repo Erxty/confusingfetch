@@ -1,0 +1,458 @@
+#!/bin/sh
+
+# This fetch never lies, so you should always trust it.
+# No need to edit this file unless yuore STUPID and want it to break.
+
+# lessconfetch is the shorter version of confetch if you were wondering
+# i might at some point make smaller logos (6 rows instead of 7) for this one day if i feel like killing myself
+
+version="1.4"
+
+white=$(printf '\033[37m')
+bold=$(printf '\033[1m')
+reset=$(printf '\033[0m')
+
+purple=$(printf '\033[35m')
+blue=$(printf '\033[34m')
+cyan=$(printf '\033[36m')
+green=$(printf '\033[32m')
+yellow=$(printf '\033[33m')
+orange=$(printf '\033[38;5;208m')
+red=$(printf '\033[31m')
+
+not_confused=0
+
+# old one right there. Pretty complicated for such a simple replacement
+# distro=$( grep PRETTY_NAME /etc/os-release | tr -d "'" | tr -d '"' | cut -d '=' -f2 )
+. /etc/os-release
+distro=$PRETTY_NAME
+
+# these are for the 2 different thinigies colours
+# keep as auto for automatic colouring according to your distro
+keycolour="auto"
+keycolour2="auto"
+accentcolour="$red"
+
+# this is for changing the logo
+# currently there are tux, debian, void, arch, nix, fedora, alpine, dragonfly, suse, and trash (fallback)
+# i dont plan on making logos for minor distros that are just forks.
+# this includes distros like mint, artix, pop, ubuntu, cachy, zorin, endeavor, etc.
+logooption="$distro"
+
+# past here is where the ugly ugly magic happens. Do NOT go further unless youre me or god
+# when writing this, only me and god knew what i was writing. Now only i know
+
+colouroption() {
+    case "$2" in
+        red)    eval "$1=\$red" ;;
+        blue)   eval "$1=\$blue" ;;
+        green)  eval "$1=\$green" ;;
+        yellow) eval "$1=\$yellow" ;;
+        cyan)   eval "$1=\$cyan" ;;
+        purple) eval "$1=\$purple" ;;
+        white)  eval "$1=\$white" ;;
+        *)
+            echo "whats that colour: '$2'?"
+            exit 1
+            ;;
+    esac
+}
+
+randomlogo() {
+	num=$(( $(cut -d' ' -f 1 /proc/uptime | cut -d'.' -f 1) % 11 ))
+			
+	case "$num" in
+    	0) logooption="tux" ;;
+	    1) logooption="debian" ;;
+	    2) logooption="void" ;;
+	    3) logooption="arch" ;;
+	    4) logooption="gentoo" ;;
+    	5) logooption="fedora" ;;
+	    6) logooption="nix" ;;
+	    7) logooption="alpine" ;;
+	    8) logooption="dragonfly" ;;
+	    9) logooption="suse" ;;
+    	*) logooption="trash" ;;
+	esac
+}
+
+helpoptions() {
+	case "$1" in
+		logo)
+			echo "  logo options:"
+			echo "    tux, debian, void, arch, fedora,"
+			echo "    alpine, dragonfly, suse, and trash (fallback)"
+			;;
+		accent)
+			echo "  accent options:"
+			echo "    white, purple, blue, cyan, green, yellow, red"
+			;;
+		key)
+			echo "  key options:"
+			echo "    white, purple, blue, cyan, green, yellow, red"
+			;;
+		key2)
+			echo "  key2 options:"
+			echo "    white, purple, blue, cyan, green, yellow, red"
+			;;
+		version)
+			echo "  nothing to help with... what??"
+			echo "    are you stupid?"
+			;;
+		larp)
+			echo "  larp options:"
+			echo "    with logos: everything that --logo has"
+			echo "    without correct logos: anything lol"
+			;;
+		not-confused)
+			echo "  buddy.. no options for this."
+			echo "    scram!!"
+			;;
+		confused)
+			echo "  i get that youre a lil confused"
+			echo "    but this doesnt have options"
+			;;
+		*)
+			echo "  what? Wtf do you need help with??"
+			;;
+	esac
+}
+
+while [ $# -gt 0 ]; do
+	case "$1" in
+		--version|-v)
+			echo "$version"
+			exit 0
+			;;
+		--logo|-l)
+			logooption="$2"
+			shift 2
+			;;
+		--key|-k)
+			colouroption keycolour "$2"
+			shift 2
+			;;
+		--key2|-K)
+    		colouroption keycolour2 "$2"
+			shift 2
+			;;
+		--accent|-a)
+			colouroption accentcolour "$2"
+			shift 2
+			;;
+		--larp|-L)
+			logooption="$2"
+			distro="$2"
+			shift 2
+			;;
+		--not-confused|-N)
+			not_confused=1
+			logooption="trash"
+			distro="ubuntu"
+
+			accentcolour="$yellow"
+			keycolour="$yellow"
+			keycolour2="$yellow"
+			shift 1
+			;;
+		--confused|-C)
+			randomlogo
+			shift
+			;;
+		--help|-h)
+			echo
+			echo "  Usage: confetch [options]"
+			echo
+			echo "    -h, --help FLAG | helps you out"
+			echo "    -v, --version | prints the version"
+			echo "    -l, --logo NAME | well wtf do you THINK it does, huh??"
+			echo "    -a, --accent COLOUR | changes your accent irl"
+			echo "    -k, --key COLOUR | changes your house keys"
+			echo "    -K, --key2 COLOUR | changes your other house keys"
+			echo "    -C, --confused | confuses you"
+			echo "    -N, --not-confused | removes all the jokes (why would you do that)"
+			echo "    -L. --larp NAME | sudo W opsec. Larpity larp"
+			echo
+			helpoptions "$2"
+			echo
+			exit 0
+			;;
+		*)
+			echo "that isnt a command buddy: $1"
+			exit 1
+			;;
+	esac
+done
+
+case "$logooption" in 
+	[Tt]ux)
+		logo1="${bold}      .--.     "
+		logo2="${bold}     |@${yellow}_${reset}${bold}@ |    "
+		logo3="${bold}     |${yellow}:_/${reset}${bold} |    "
+		logo4="${bold}    //   \ \   "
+		logo5="${bold}   (J     l )  "
+		logo6="${bold}  /'\_   _/'\  "
+		logo7="${bold}  \___)=(___/  "
+		space="               "
+		;;
+	*[Vv]oid*)
+		logo1="${bold}${green}     _*###*_    "
+		logo2="${bold}${green}            \\   "
+		logo3="${bold}${green}   $   ${reset}${bold}/\`\ ${green}  $  "
+		logo4="${bold}${green}  |   ${reset}${bold}| @ |${green}   | "
+		logo5="${bold}${green}   $   ${reset}${bold}\_/${green}   $  "
+		logo6="${bold}${green}    \_          "
+		logo7="${bold}${green}      *###*     "
+		space="                "
+		;;
+	*[Dd]ebian*)
+		logo1="${bold}${red}     ______   "
+		logo2="${bold}${red}    /  __  \  "
+		logo3="${bold}${red}   /  /  \  | "
+		logo4="${bold}${red}  |  |     /  "
+		logo5="${bold}${red}   \  '-_-'   "
+		logo6="${bold}${red}    \         "
+		logo7="${bold}${red}     '-__     "
+		space="              "
+		;;
+	*[Aa]rch*)
+		logo1="${bold}${blue}        /\        "
+		logo2="${bold}${blue}       /  \       "
+		logo3="${bold}${blue}      /    \      "
+		logo4="${bold}${blue}     /  __  \     "
+		logo5="${bold}${blue}    /  |  |  \    "
+		logo6="${bold}${blue}   / _/    \_ \   "
+		logo7="${bold}${blue}  /.'        '.\  "
+		space="                  "
+		;;
+	*[Gg]entoo*)
+		logo1="${bold}${purple}    _-'''-_     "
+		logo2="${bold}${purple}   /       *    "
+		logo3="${bold}${purple}  |_    O   \   "
+		logo4="${bold}${purple}   _->       |> "
+		logo5="${bold}${purple}  |         /   "
+		logo6="${bold}${purple}   \_     _*    "
+		logo7="${bold}${purple}     -...-      "
+		space="                "
+		;;
+	*[Ff]edora*)
+		logo1="${bold}${blue}     _*#####*_    "
+		logo2="${bold}${blue}    /    ${reset}${bold}__${blue}   \   "
+		logo3="${bold}${blue}   $    ${reset}${bold}|  |${blue}   $  "
+		logo4="${bold}${blue}  |   ${reset}${bold}__|__|${blue}    |  "
+		logo5="${bold}${blue}  |  ${reset}${bold}|  |${blue}      $  "
+		logo6="${bold}${blue}  |  ${reset}${bold}|__|${blue}    _/   "
+		logo7="${bold}${blue}  \_________*     "
+		space="                  "
+		;;
+	*[Nn]ix*)
+		logo1="${bold}${blue}      \\\   ${cyan}\\\ //    "
+		logo2="${bold}${blue}    /=======${cyan}\\\/     "
+		logo3="${bold}${cyan}     //      \\\ ${blue}//  "
+		logo4="${bold}${cyan}  /=//${blue}        //==/ "
+		logo5="${bold}${cyan}   //${blue}\\\      //     "
+		logo6="${bold}${blue}      \\\ ${cyan}=======/   "
+		logo7="${bold}${blue}     //\\\ ${cyan}    \\\    "
+		space="                    "
+		;;
+	*[Aa]lpine*)
+		logo1="${bold}${blue}        __            "
+		logo2="${bold}${blue}       /  \  __       "
+		logo3="${bold}${blue}      / /\ \/  \      "
+		logo4="${bold}${blue}     / /  \ \/\ \     "
+		logo5="${bold}${blue}    / /    \ \ \ \    "
+		logo6="${bold}${blue}   / /|     \ \ \ \   "
+		logo7="${bold}${blue}  /_/_|      \_\ \_\  "
+		space="                      "
+		;;
+	[Dd]ragonfly)
+		logo1="${bold}    *${red}-${reset}*    "
+		logo2="${bold} {'*_${red}|${reset}_*'} "
+		logo3="${bold} {_*'${red}|${reset}'*_} "
+		logo4="${bold}     ${red}|     "
+		logo5="${bold}     ${red}|     "
+		logo6="${bold}     ${red}|     "
+		logo7="${bold}     ${red}|     "
+		space="           "
+		;;
+	*[Ss]use*)
+		logo1="${bold}${green}  |̈́'**--.__         "
+		logo2="${bold}${green}         ,_\`*--.    "
+		logo3="${bold}${green}        /__\    \   "
+		logo4="${bold}${green}   ____,\_./  ,__\  "
+		logo5="${bold}${green}   \*._ \`'-*'\`___,  "
+		logo6="${bold}${green}       \`'*--*' _./  "
+		logo7="${bold}${green}  --.,,,.----*'     "
+		space="                    "
+		;;
+	*)
+		# this is a trash can btw
+		logo1="${bold}  ___________  "
+		logo2="${bold}  \X#X#X#X#X/  "
+		logo3="${bold}  \#X#X#X#X#/  "
+		logo4="${bold}  \X#X#X#X#X/  "
+		logo5="${bold}  \#X#X#X#X#/  "
+		logo6="${bold}  \X#X#X#X#X/  "
+		logo7="${bold}  |#X#X#X#X#|  "
+		space="               "
+		;;
+esac
+
+case "$distro" in 
+	*[Vv]oid*)
+		distroecho="$USER fell out of the world"
+		if [ "$keycolour" = "auto" ]; then
+			keycolour="$green"
+		fi
+		if [ "$keycolour2" = "auto" ]; then
+			keycolour2="$green"
+		fi
+		;;
+	*[Aa]rch*)
+		distroecho="too minimal for the average, not minimal enough for the experienced"
+		if [ "$keycolour" = "auto" ]; then
+			keycolour="$blue"
+		fi
+		if [ "$keycolour2" = "auto" ]; then
+			keycolour2="$blue"
+		fi
+		;;
+	*[Dd]ebian*)
+		distroecho="packages from the jurassic period lol"
+		if [ "$keycolour" = "auto" ]; then
+			keycolour="$red"
+		fi
+		if [ "$keycolour2" = "auto" ]; then
+			keycolour2="$red"
+		fi
+		;;
+	*[Gg]entoo*)
+		distroecho="have a lot of freetime, yeah?"
+		if [ "$keycolour" = "auto" ]; then
+			keycolour="$purple"
+		fi
+		if [ "$keycolour2" = "auto" ]; then
+			keycolour2="$purple"
+		fi
+		;;
+	*[Ff]edora*)
+		distroecho="test rabbit for RHEL"
+		if [ "$keycolour" = "auto" ]; then
+			keycolour="$blue"
+		fi
+		if [ "$keycolour2" = "auto" ]; then
+			keycolour2="$blue"
+		fi
+		;;
+	*[Nn]ix*)
+		distroecho="soystemd land"
+		if [ "$keycolour" = "auto" ]; then
+			keycolour="$cyan"
+		fi
+		if [ "$keycolour2" = "auto" ]; then
+			keycolour2="$cyan"
+		fi
+		;;
+	*[Aa]lpine*)
+		distroecho="im musling it"
+		if [ "$keycolour" = "auto" ]; then
+			keycolour="$blue"
+		fi
+		if [ "$keycolour2" = "auto" ]; then
+			keycolour2="$blue"
+		fi
+		;;
+	*[Ss]use*)
+		distroecho="fedora EU edition"
+		if [ "$keycolour" = "auto" ]; then
+			keycolour="$green"
+		fi
+		if [ "$keycolour2" = "auto" ]; then
+			keycolour2="$green"
+		fi
+		;;
+	*)
+		distroecho="ay i dont support this! Stop using confetch!!"
+		if [ "$keycolour" = "auto" ]; then
+			keycolour="$red"
+		fi
+		if [ "$keycolour2" = "auto" ]; then
+			keycolour2="$blue"
+		fi
+		;;
+esac
+
+wm="something niche probably"
+hostname=$(hostname)
+sea=$( basename "$SHELL" )
+krnl=$(uname -r)
+
+packages=$(
+	if command -v apt-get > /dev/null 2>&1; then
+	   dpkg-query -f '.\n' -W | wc -l
+	elif command -v pacman > /dev/null 2>&1; then
+	   pacman -Qq | wc -l
+	elif command -v dnf > /dev/null 2>&1; then
+	   rpm -qa --queryformat '.\n' | wc -l
+	elif command -v zypper > /dev/null 2>&1; then
+	   rpm -qa --queryformat '.\n' | wc -l
+	elif command -v xbps-query > /dev/null 2>&1; then
+		xbps-query -l | wc -l
+	elif command -v emerge > /dev/null 2>&1; then
+		ls /var/db/pkg/*/* -d | wc -l
+	elif command -v apk > /dev/null 2>&1; then
+		apk info | wc -l
+	elif command -v nix-env > /dev/null 2>&1; then
+		nix-env --query | wc -l
+	else
+	   echo "no"
+	fi
+)
+
+if [ "$packages" != "no" ]; then
+	packages_low=$(( $packages * 10 / 12 ))
+	packages_high=$(( $packages * 16 / 10 ))
+	packages="prolly like ${packages_low} to ${packages_high}"
+else
+	packages="stop using a niche distro ya bum"
+fi
+
+uptime_seconds=$( cut -d' ' -f 1 /proc/uptime | cut -d'.' -f 1 )
+uptime_minutes=$(( $uptime_seconds / 60 ))
+uptime_hours=$(( $uptime_minutes / 60 ))
+uptime=$(
+	if [ "$uptime_hours" -ge 10 ]; then
+		echo "${keycolour}${bold}ew get off your computer wtf.${reset} Youve been on for ${uptime_hours} h"
+	elif [ "$uptime_hours" -ge 5 ]; then
+		echo "${keycolour}${bold}go touch some grass, ok?${reset} ${uptime_hours} h"
+	elif [ "$uptime_hours" -ge 1 ]; then
+		echo "${keycolour}${bold}keep on using that computer, computer boy.${reset} ${uptime_minutes} min"
+	elif [ "$uptime_minutes" -ge 30 ]; then
+		echo "${keycolour}${bold}wow, not too much, huh?${reset} ${uptime_minutes} min"
+	else 
+		echo "${keycolour}${bold}computah, slime this guy out.${reset} ${uptime_minutes} min"
+	fi
+)
+
+if [ "$not_confused" = "1" ]; then
+	wm="something serious ig"
+	sea="dude thought"
+	krnl="it was actually gonna be serious"
+	uptime="${yellow}uptime${reset} = a million billion hours cause youre a chud"
+	packages="ZERO"
+fi
+
+echo "$logo1" "${keycolour}${bold}${distroecho}${reset} =" "${distro} user BTW"
+
+# how do i do this one 
+echo "$logo2" "${keycolour}${bold}window manager${reset} =" "$wm"
+
+echo "$logo3" "${keycolour}${bold}like.. a seashell?${reset} =" "$sea"
+
+echo "$logo4" "${keycolour}${bold}highest ranking non-General grade officer${reset} =" "$krnl" 
+
+echo "$logo5" "$uptime"
+
+echo "$logo6" "${keycolour}${bold}aliexpress packages${reset} =" "$packages"
+
+# Ik its badly made btw
