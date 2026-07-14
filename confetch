@@ -366,12 +366,8 @@ cpu=$(awk -F ': ' '/model name*:*/{print $2; exit}' /proc/cpuinfo)
 
 gpuNumber=$(lspci | grep VGA | awk '{print $1; exit}')
 
-echo "$gpuNumber"
-
 gpu=$(lspci -v -s "${gpuNumber}" | awk -F': ' '/Subsystem:/{print $2}')
 [ -z "$gpu" ] && gpu=$(lspci -mm -s 07:00.0 | awk -F'"' '{print $6}' | cut -d'[' -f1)
-
-echo "$gpu"
 
 sea="${SHELL##*/}"
 
