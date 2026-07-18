@@ -3,11 +3,13 @@
 # This fetch never lies, so you should always trust it.
 # No need to edit this file unless yuore STUPID and want it to break.
 
-version="1.5"
+version="version 1.6"
 
-white=$(printf '\033[37m')
 bold=$(printf '\033[1m')
 reset=$(printf '\033[0m')
+
+black=$(printf '\033[0;30m')
+white=$(printf '\033[37m')
 
 purple=$(printf '\033[35m')
 blue=$(printf '\033[34m')
@@ -16,28 +18,60 @@ green=$(printf '\033[32m')
 yellow=$(printf '\033[33m')
 red=$(printf '\033[31m')
 
-not_confused=0
+brightred=$(printf '\033[0;91m')
+
+# decides what modules are in the output. possible options are:
+	# title wm kernel shell cpu gpu ram packages terminal uptime distro
+# the order changes depending on this aswell just so yk
+enabled="
+title 
+distro 
+wm 
+shell 
+kernel 
+packages 
+uptime 
+terminal 
+ram 
+cpu 
+gpu"
+# actually no need to take anyhting out of $enabled,
+# just add what you want to remove into $disabled
+disabled="
+"
 
 # these are for the 2 different thinigies colours
 # keep as auto for automatic colouring according to your distro
 keycolour="auto"
-keycolour2="auto"
-accentcolour="$red"
+accentcolour="auto"
 
-# old one right there. Pretty complicated for such a simple replacement
-# distro=$( grep PRETTY_NAME /etc/os-release | tr -d "'" | tr -d '"' | cut -d '=' -f2 )
+# gets your distro. Needed before logooption
 . /etc/os-release
 distro=$PRETTY_NAME
 distroShort=$NAME
 
 # this is for changing the logo
-# currently there are tux, debian, void, arch, nix, fedora, slackware, alpine, dragonfly, suse, and trash (fallback)
-# i dont plan on making logos for minor distros that are just forks.
-# this includes distros like mint, artix, pop, ubuntu, cachy, zorin, endeavor, etc.
+# for a list of logos, use "confetch -h logo"
+# i dont plan on making logos for forks unless i decide otherwise.
+# this includes distros like mint, artix, pop, cachy, zorin, endeavor, etc.
 logooption="$distro"
 
 # past here is where the ugly ugly magic happens. Do NOT go further unless youre me.
 # when writing this, only me and god knew what i was writing. Now only i know.
+
+hostname=$(cat /etc/hostname)
+lineCount=0
+asciiLineCount=0
+
+addLine() {
+    lineCount=$((lineCount + 1))
+    eval "line_$lineCount=\$1"
+}
+
+asciiAddLine() {
+	asciiLineCount=$((asciiLineCount + 1))
+	eval "ascii_$asciiLineCount=\$1"
+}
 
 colouroption() {
     case "$2" in
@@ -48,6 +82,7 @@ colouroption() {
         cyan)   eval "$1=\$cyan" ;;
         purple) eval "$1=\$purple" ;;
         white)  eval "$1=\$white" ;;
+        black)  eval "$1=\$black" ;;
         *)
             echo "whats that colour: '$2'?"
             exit 1
@@ -55,15 +90,15 @@ colouroption() {
     esac
 }
 
-set_auto_colour() {
+setAutoColour() {
     [ "$keycolour" = "auto" ] && keycolour=$1
-    [ "$keycolour2" = "auto" ] && keycolour2=$1
+    [ "$accentcolour" = "auto" ] && accentcolour=$2
 }
 
 randomlogo() {
 	read -r up _ < /proc/uptime
-	num=$(( ${up%%.*} % 11 ))
-			
+	num=$(( ${up%%.*} % 21 ))
+
 	case "$num" in
     	0) logooption="tux" ;;
 	    1) logooption="debian" ;;
@@ -75,6 +110,17 @@ randomlogo() {
 	    7) logooption="alpine" ;;
 	    8) logooption="dragonfly" ;;
 	    9) logooption="suse" ;;
+	    10) logooption="netbsd" ;;
+	    11) logooption="freebsd" ;;
+	    12) logooption="openbsd" ;;
+	    13) logooption="plan9" ;;
+	    14) logooption="gnu" ;;
+	    15) logooption="guix" ;;
+	    16) logooption="crux" ;;
+	    17) logooption="exherbo" ;;
+	    18) logooption="nerv" ;;
+	    19) logooption="seele" ;;
+	    20) logooption="navi" ;;
     	*) logooption="trash" ;;
 	esac
 }
@@ -83,8 +129,10 @@ helpoptions() {
 	case "$1" in
 		logo)
 			echo "  logo options:"
-			echo "    tux, debian, void, arch, fedora,"
-			echo "    alpine, dragonfly, suse, and trash (fallback)"
+			echo "    tux, debian, nix, void, arch, fedora, freebsd,"
+			echo "    alpine, slackware, dragonfly, suse, netbsd,"
+			echo "    openbsd, plan9, gentoo, gnu, guix, crux, exherbo,"
+			echo "    nerv, seele, navi, and trash (fallback)"
 			;;
 		accent)
 			echo "  accent options:"
@@ -105,15 +153,16 @@ helpoptions() {
 		larp)
 			echo "  larp options:"
 			echo "    with logos: everything that --logo has"
+			echo "    ^^ except for the non distros like seele or nerv"
 			echo "    without correct logos: anything lol"
-			;;
-		not-confused)
-			echo "  buddy.. no options for this."
-			echo "    scram!!"
 			;;
 		confused)
 			echo "  i get that youre a lil confused"
 			echo "    but this doesnt have options"
+			;;
+		shorter)
+			echo "  no options buddy.."
+			echo "    will make a separate module flag in the future"
 			;;
 		*)
 			echo "  what? Wtf do you need help with??"
@@ -135,10 +184,6 @@ while [ $# -gt 0 ]; do
 			colouroption keycolour "$2"
 			shift 2
 			;;
-		--key2|-K)
-    		colouroption keycolour2 "$2"
-			shift 2
-			;;
 		--accent|-a)
 			colouroption accentcolour "$2"
 			shift 2
@@ -149,18 +194,13 @@ while [ $# -gt 0 ]; do
 			distro="$2"
 			shift 2
 			;;
-		--not-confused|-N)
-			not_confused=1
-			logooption="trash"
-			distro="ubuntu"
-
-			accentcolour="$yellow"
-			keycolour="$yellow"
-			keycolour2="$yellow"
-			shift 1
-			;;
 		--confused|-C)
 			randomlogo
+			shift
+			;;
+		--shorter|-s)
+			# how i usually run this (yes, i use this instead of fastfetch)
+			disabled="cpu gpu ram terminal"
 			shift
 			;;
 		--help|-h)
@@ -173,9 +213,8 @@ while [ $# -gt 0 ]; do
     -l, --logo NAME       | well wtf do you THINK it does, huh??
     -a, --accent COLOUR   | changes your accent irl
     -k, --key COLOUR      | changes your house keys
-    -K, --key2 COLOUR     | changes your other house keys
     -C, --confused        | confuses you
-    -N, --not-confused    | removes all the jokes (why would you do that)
+    -s, --shorter         | gets rid of a few modules
     -L. --larp NAME       | sudo W opsec. Larpity larp
 
 EOF
@@ -190,310 +229,550 @@ EOF
 	esac
 done
 
-case "$logooption" in 
-	[Tt]ux)
-		logo1="${bold}      .--.     "
-		logo2="${bold}     |@${yellow}_${reset}${bold}@ |    "
-		logo3="${bold}     |${yellow}:_/${reset}${bold} |    "
-		logo4="${bold}    //   \ \   "
-		logo5="${bold}   (J     l )  "
-		logo6="${bold}  /'\_   _/'\  "
-		logo7="${bold}  \___)=(___/  "
-		space="               "
-		;;
-	*[Vv]oid*)
-		logo1="${bold}${green}     _*###*_    "
-		logo2="${bold}${green}            \\   "
-		logo3="${bold}${green}   $   ${reset}${bold}/\`\ ${green}  $  "
-		logo4="${bold}${green}  |   ${reset}${bold}| @ |${green}   | "
-		logo5="${bold}${green}   $   ${reset}${bold}\_/${green}   $  "
-		logo6="${bold}${green}    \_          "
-		logo7="${bold}${green}      *###*\`    "
-		space="                "
-		;;
-	*[Dd]ebian*)
-		logo1="${bold}${red}     ______    "
-		logo2="${bold}${red}    /  __  \   "
-		logo3="${bold}${red}   /  /  \  |  "
-		logo4="${bold}${red}  |  |     /   "
-		logo5="${bold}${red}   \  '-_-'    "
-		logo6="${bold}${red}    \          "
-		logo7="${bold}${red}     '-__      "
-		space="              "
-		;;
-	*[Aa]rch*)
-		logo1="${bold}${blue}        /\        "
-		logo2="${bold}${blue}       /  \       "
-		logo3="${bold}${blue}      /    \      "
-		logo4="${bold}${blue}     /  __  \     "
-		logo5="${bold}${blue}    /  |  |  \    "
-		logo6="${bold}${blue}   / _/    \_ \   "
-		logo7="${bold}${blue}  /.'        '.\  "
-		space="                  "
-		;;
-	*[Gg]entoo*)
-		logo1="${bold}${purple}    _-'''-_     "
-		logo2="${bold}${purple}   /       *    "
-		logo3="${bold}${purple}  |_    O   \   "
-		logo4="${bold}${purple}   _->       |> "
-		logo5="${bold}${purple}  |         /   "
-		logo6="${bold}${purple}   \_     _*    "
-		logo7="${bold}${purple}     -...-      "
-		space="                "
-		;;
-	*[Ff]edora*)
-		logo1="${bold}${blue}     _*#####*_    "
-		logo2="${bold}${blue}    /    ${reset}${bold}__${blue}   \   "
-		logo3="${bold}${blue}   $    ${reset}${bold}|  |${blue}   $  "
-		logo4="${bold}${blue}  |   ${reset}${bold}__|__|${blue}    |  "
-		logo5="${bold}${blue}  |  ${reset}${bold}|  |${blue}      $  "
-		logo6="${bold}${blue}  |  ${reset}${bold}|__|${blue}    _/   "
-		logo7="${bold}${blue}  \_________*     "
-		space="                  "
-		;;
-	*[Nn]ix*)
-		logo1="${bold}${blue}    _**___${cyan}/\/\     "
-		logo2="${bold}${blue}   I______${cyan}\  /${blue}__   "
-		logo3="${bold}${cyan}    _/ /   \ ${blue}/ /   "
-		logo4="${bold}${cyan}   /  <    ${blue} > _/   "
-		logo5="${bold}${cyan}   /_/ ${blue}\\${cyan}___${blue}/${cyan}_${blue}/${cyan}_    "
-		logo6="${bold}${blue}     /  \\${cyan}___  _I   "
-		logo7="${bold}${blue}     \/\/ ${cyan}  **     "
-		space="                   "
-		;;
-	*[Aa]lpine*)
-		logo1="${bold}${blue}        __            "
-		logo2="${bold}${blue}       /  \  __       "
-		logo3="${bold}${blue}      / /\ \/  \      "
-		logo4="${bold}${blue}     / /  \ \/\ \     "
-		logo5="${bold}${blue}    / /    \ \ \ \    "
-		logo6="${bold}${blue}   / /|     \ \ \ \   "
-		logo7="${bold}${blue}  /_/_|      \_\ \_\  "
-		space="                      "
-		;;
-	[Dd]ragonfly)
-		logo1="${bold}    *${red}-${reset}*    "
-		logo2="${bold} {'*_${red}|${reset}_*'} "
-		logo3="${bold} {_*'${red}|${reset}'*_} "
-		logo4="${bold}     ${red}|     "
-		logo5="${bold}     ${red}|     "
-		logo6="${bold}     ${red}|     "
-		logo7="${bold}     ${red}|     "
-		space="           "
-		;;
-	*[Ss]use*)
-		logo1="${bold}${green}  |̈́'**--.__         "
-		logo2="${bold}${green}         ,_\`*--.    "
-		logo3="${bold}${green}        /__\    \   "
-		logo4="${bold}${green}   ____,\_./  ,__\  "
-		logo5="${bold}${green}   \*._ \`'-*'\`___,  "
-		logo6="${bold}${green}       \`'*--*' _./  "
-		logo7="${bold}${green}  --.,,,.----*'     "
-		space="                    "
-		;;
-	*[Ss]lack*)
-		logo1="${bold}${blue}     ,-*##\$##*-,     "
-		logo2="${bold}${blue}    /  ${reset}${bold},'\`\`'*I${blue}  \    "
-		logo3="${bold}${blue}   $   ${reset}${bold}\`~--._${blue}    $   "
-		logo4="${bold}${blue}  |[         ${reset}${bold}\`)${blue}  ]|  "
-		logo5="${bold}${blue}   $  ${reset}${bold},I*.__.*\`${blue}  $   "
-		logo6="${bold}${blue}    \ ${reset}${bold}|--------${blue} /    "
-		logo7="${bold}${blue}     '-*##\$##*-'     "
-		space="                     "
-		;;
-	*)
-		# this is a trash can btw
-		logo1="${bold}  ___________  "
-		logo2="${bold}  \X#X#X#X#X/  "
-		logo3="${bold}  \#X#X#X#X#/  "
-		logo4="${bold}  \X#X#X#X#X/  "
-		logo5="${bold}  \#X#X#X#X#/  "
-		logo6="${bold}  \X#X#X#X#X/  "
-		logo7="${bold}  |#X#X#X#X#|  "
-		space="               "
-		;;
-esac
-
 case "$distro" in 
 	*[Vv]oid*)
 		distroecho="$USER died to the void"
-		set_auto_colour "$green"
+		setAutoColour "$green" "$red"
 		;;
 	*[Aa]rch*)
 		distroecho="too minimal for the average, not minimal enough for the experienced"
-		set_auto_colour "$blue"
+		setAutoColour "$blue" "$red"
 		;;
 	*[Dd]ebian*)
 		distroecho="packages from the jurassic period lol"
-		set_auto_colour "$red"
+		setAutoColour "$red" "$purple"
 		;;
 	*[Gg]entoo*)
 		distroecho="have a lot of freetime, yeah?"
-		set_auto_colour "$purple"
+		setAutoColour "$purple" "$cyan"
 		;;
 	*[Ff]edora*)
 		distroecho="test rabbit for RHEL"
-		set_auto_colour "$blue"
+		setAutoColour "$blue" "$green"
 		;;
 	*[Nn]ix*)
 		distroecho="soystemd land"
-		set_auto_colour "$cyan"
+		setAutoColour "$cyan" "$blue"
 		;;
 	*[Aa]lpine*)
 		distroecho="im musling it"
-		set_auto_colour "$blue"
+		setAutoColour "$blue" "$yellow"
 		;;
 	*[Ss]use*)
 		distroecho="fedora EU edition"
-		set_auto_colour "$green"
+		setAutoColour "$green" "$yellow"
 		;;
 	*[Ss]lack*)
 		distroecho="okay grandpa"
-		set_auto_colour "$blue"
+		setAutoColour "$blue" "$black"
+		;;
+	*[Nn]et[Bb][Ss][Dd]*)
+		distroecho="using it just to be niche icel"
+		setAutoColour "$red" "$black"
+		;;
+	*[Dd]ragonfly*)
+		distroecho="dont go flying little"
+		setAutoColour "$red" "$green"
+		;;
+	*[Ff]ree[Bb][Ss][Dd]*)
+		distroecho="$USER met the devil"
+		setAutoColour "$red" "$red"
+		;;
+	*[Oo]pen[Bb][Ss][Dd]*)
+		distroecho="paranoid, are we?"
+		setAutoColour "$yellow" "$blue"
+		;;
+	*[Pp]lan9*)
+		distroecho="tru unix.."
+		setAutoColour "$black" "$purple"
+		;;
+	*[Gg]uix*)
+		distroecho="nix, but better i suppose"
+		setAutoColour "$yellow" "$blue"
+		;;
+	*[Cc]rux*)
+		distroecho="funny little penguin.."
+		setAutoColour "$blue" "$yellow"
+		;;
+	*[Ee]xherbo*)
+		distroecho="ANYTHING to be niche ig"
+		setAutoColour "$blue" "$brightred"
 		;;
 	*)
 		distroecho="ay this isnt supported! Stop using confetch!!"
-		set_auto_colour "$red"
+		setAutoColour "$red" "$red"
 		;;
 esac
-	
 
-wm="something niche probably"
+for module in $enabled; do
+	case " $disabled " in
+		*" $module "*) continue ;;
+	esac
 
-hostname=$(hostname)
+	case "$module" in
 
-cpu=$(awk -F ': ' '/model name*:*/{print $2; exit}' /proc/cpuinfo)
+		title)
+		  titlekey="sudo apt ddos"
+		  title="${bold}${accentcolour}$USER${reset}@${bold}${accentcolour}${hostname}${reset}"
+		  title="   ${reset}${titlekey}${reset} ${title}"
+		  addLine "$title"
+		;;
 
-gpuNumber=$(lspci | grep VGA | awk '{print $1; exit}')
+		distro)
+			distrokey="${distroecho}"
+			distromod="${distroShort} user BTW"
+			distromod="${bold}${keycolour}${distrokey}${reset} = ${distromod}"
+		  	addLine "$distromod"
+		;;
 
-gpu=$(lspci -v -s "${gpuNumber}" | awk -F': ' '/Subsystem:/{print $2}')
-[ -z "$gpu" ] && gpu=$(lspci -mm -s 07:00.0 | awk -F'"' '{print $6}' | cut -d'[' -f1)
+		wm)
+		 	wm="something niche probably"
+	 		case "$WAYLAND_DISPLAY" in
+	    		"")
+		        	server=X11
+		        	wmkey="window manager"
+    		    ;;
+	    		*)
+		         	server=Wayland
+		         	wmkey="compositor"
+    		    ;;
+		 	esac
+	 		wm="${bold}${keycolour}${wmkey}${reset} = ${wm} (${server})"
+		  	addLine "$wm"
+		 ;;
 
-sea="${SHELL##*/}"
+		shell)
+			shell="${SHELL##*/}"
+	 		shellkey="like.. a seashell?"
+		 	shell="${bold}${keycolour}${shellkey}${reset} = ${shell}"
+		 	addLine "$shell"
+		;;
 
-krnl=$(uname -r)
+		kernel)
+			kernel=$(uname -r )
+			kernelkey="highest ranking non-General grade officer"
+			kernel="${bold}${keycolour}${kernelkey}${reset} = ${kernel}"
+		  	addLine "$kernel"
+		;;
 
-case "$WAYLAND_DISPLAY" in
-    "")
-        server=X11
-        ;;
-    *)
-        server=Wayland
-        ;;
+		uptime)
+			read -r uptime _ < /proc/uptime
+			uptime_seconds=${uptime%%.*}
+			uptime_minutes=$(( $uptime_seconds / 60 ))
+			uptime_hours=$(( $uptime_minutes / 60 ))
+			if [ "$uptime_hours" -ge 10 ]; then
+				uptimekey="ew get off your computer wtf. Youve been on for"
+				uptime="${uptime_hours} hours"
+			elif [ "$uptime_hours" -ge 5 ]; then
+				uptimekey="go touch some grass, ok?"
+				uptime="${uptime_hours} hours"
+			elif [ "$uptime_hours" -ge 2 ]; then 
+				uptimekey="get off soon, alr?"
+				uptime="${uptime_hours} hours"
+			elif [ "$uptime_hours" -ge 1 ]; then
+				uptimekey="keep on using that computer, computer boy."
+				uptime="${uptime_minutes} minutes"
+			elif [ "$uptime_minutes" -ge 30 ]; then
+				uptimekey="wow, not too much, huh? "
+				uptime="${uptime_minutes} minutes"
+			else 
+				uptimekey="computah, slime this guy out. "
+				uptime="${uptime_minutes} minutes"
+			fi
+			uptime="${bold}${keycolour}${uptimekey}${reset} ${uptime}"
+		  	addLine "$uptime"
+		;;
+
+		packages)
+			packages=$(
+				if command -v apt-get > /dev/null 2>&1; then
+		   			dpkg-query -f '.\n' -W | wc -l
+				elif command -v pacman > /dev/null 2>&1; then
+		   			pacman -Qq | wc -l
+				elif command -v dnf > /dev/null 2>&1; then
+		   			rpm -qa --queryformat '.\n' | wc -l
+				elif command -v zypper > /dev/null 2>&1; then
+		   			rpm -qa --queryformat '.\n' | wc -l
+				elif command -v xbps-query > /dev/null 2>&1; then
+					xbps-query -l | wc -l
+				elif command -v emerge > /dev/null 2>&1; then
+					ls /var/db/pkg/*/* -d | wc -l
+				elif command -v apk > /dev/null 2>&1; then
+					apk info | wc -l
+				elif command -v nix-env > /dev/null 2>&1; then
+					nix-env --query | wc -l
+				else
+		   			echo "no"
+				fi
+			)
+
+			if [ "$packages" != "no" ]; then
+				packages_low=$(( $packages * 10 / 12 ))
+				packages_high=$(( $packages * 16 / 10 ))
+				packages="prolly like ${packages_low} to ${packages_high}"
+			else
+				packages="stop using a niche distro ya bum"
+			fi
+			packageskey="aliexpress packages"
+			packages="${bold}${keycolour}${packageskey}${reset} = ${packages}"
+		  	addLine "$packages"
+		;;
+
+		terminal)
+			case "$TERM" in
+				*foot*)
+					terminalkey="mghh.. feet :drooling_face: term"
+					terminal="yummy in my tummy"
+				;;
+				*kitty*)
+					terminalkey="kitty? i like them. term"
+					terminal="cat"
+				;;
+				*rxvt-unicode*)
+					terminalkey="the best x11 term btw. term"
+					terminal="urxvt"
+				;;
+				*xterm*)
+					terminalkey="why are you using this..? term"
+					terminal="$TERM"
+				;;
+				*)
+					terminalkey="prolly a bad term"
+					terminal="$TERM"
+				;;
+			esac
+			terminal="${bold}${keycolour}${terminalkey}${reset} = ${terminal}"
+		  	addLine "$terminal"
+		;;
+
+		cpu)
+	 		cpu=$( awk -F ': ' '/model name*:*/{print $2; exit}' /proc/cpuinfo )
+		 	cpukey="cpu"
+	 		cpu="${space}${bold}${keycolour}${cpukey}${reset} = ${cpu}"
+		  	addLine "$cpu"
+		;;
+
+		gpu)
+			if command -v lspci >/dev/null; then
+   				gpuNumber=$(lspci | grep VGA | awk '{print $1; exit}')
+    
+				gpu=$(lspci -v -s "${gpuNumber}" | awk -F': ' '/Subsystem:/{print $2}')
+				[ -z "$gpu" ] && gpu=$(lspci -mm -s "${gpuNumber}" | awk -F'"' '{print $6}' | cut -d'[' -f1)
+			else
+	    		gpu="you dont have one, you poor bastard"
+			fi
+			gpukey="gpu"
+			gpu="${bold}${keycolour}${gpukey}${reset} = ${gpu}"
+		  	addLine "$gpu"
+		;;
+		
+		ram)
+    		while read -r key value unit; do
+		        [ "$key" = "MemTotal:" ] && { ramTotal=$value; break; }
+		    done < /proc/meminfo
+		    while read -r key value unit; do
+        		[ "$key" = "MemAvailable:" ] && { ramAvail=$value; break; }
+		    done < /proc/meminfo
+		    
+    		ramUsed=$(( ramTotal - ramAvail ))
+
+    		ramTotal_GB_full=$(( ramTotal / 1000000 ))
+		    ramTotal_tenth=$(( ramTotal / 100000 ))
+		    ramUsed_tenth=$(( ramUsed / 100000 ))
+
+		    ramTotal_GB="$(( ramTotal_tenth / 10 )).$(( ramTotal_tenth % 10 ))"
+		    ramUsed_GB="$(( ramUsed_tenth / 10 )).$(( ramUsed_tenth % 10 ))"
+
+			ram=$(
+        		if [ "$ramTotal_GB_full" -ge 63 ]; then
+					echo "${ramUsed_GB}GB/${ramTotal_GB}GB?? sharing is caring btw"
+		        elif [ "$ramTotal_GB_full" -ge 31 ]; then
+					echo "${ramUsed_GB}GB/${ramTotal_GB}GB, a couple browser tabs worth"
+        		elif [ "$ramTotal_GB_full" -ge 15 ]; then
+					echo "${ramUsed_GB}GB/${ramTotal_GB}GB, pretty average tbh"
+        		elif [ "$ramTotal_GB_full" -ge 7 ]; then
+					echo "${ramUsed_GB}GB/${ramTotal_GB}GB, you better hope GTA 6 never releases"
+				else
+					echo "only ${ramUsed_GB}GB/${ramTotal_GB}GB..? treat yourself, please"
+				fi
+			)
+    		ramkey="ai food"
+    		ram="${bold}${keycolour}${ramkey}${reset} = ${ram}"
+    		addLine "$ram"
+    		;;
+
+	esac
+done
+
+case "$logooption" in 
+	[Tt]ux)
+		asciiAddLine "${bold}      .--.     "
+		asciiAddLine "${bold}     |@${yellow}_${reset}${bold}@ |    "
+		asciiAddLine "${bold}     |${yellow}:_/${reset}${bold} |    "
+		asciiAddLine "${bold}    //   \ \   "
+		asciiAddLine "${bold}   (J     l )  "
+		asciiAddLine "${bold}  /'\_   _/'\  "
+		asciiAddLine "${bold}  \___)=(___/  ${reset}"
+		space="               "
+		;;
+	*[Vv]oid*)
+		asciiAddLine "${bold}${green}     _*###*_    "
+		asciiAddLine "${bold}${green}            \\   "
+		asciiAddLine "${bold}${green}   $   ${reset}${bold}/\`\ ${green}  $  "
+		asciiAddLine "${bold}${green}  |   ${reset}${bold}| @ |${green}   | "
+		asciiAddLine "${bold}${green}   $   ${reset}${bold}\_/${green}   $  "
+		asciiAddLine "${bold}${green}    \_          "
+		asciiAddLine "${bold}${green}      *###*\`    ${reset}"
+		space="                "
+		;;
+	*[Dd]ebian*)
+		asciiAddLine "${bold}${red}     ______    "
+		asciiAddLine "${bold}${red}    /  __  \   "
+		asciiAddLine "${bold}${red}   /  /  \  |  "
+		asciiAddLine "${bold}${red}  |  |     /   "
+		asciiAddLine "${bold}${red}   \  '-_-'    "
+		asciiAddLine "${bold}${red}    \          "
+		asciiAddLine "${bold}${red}     '-__      ${reset}"
+		space="               "
+		;;
+	*[Aa]rch*)
+		asciiAddLine "${bold}${blue}        /\        "
+		asciiAddLine "${bold}${blue}       /  \       "
+		asciiAddLine "${bold}${blue}      /    \      "
+		asciiAddLine "${bold}${blue}     /  __  \     "
+		asciiAddLine "${bold}${blue}    /  |  |  \    "
+		asciiAddLine "${bold}${blue}   / _/    \_ \   "
+		asciiAddLine "${bold}${blue}  /.'        '.\  ${reset}"
+		space="                  "
+		;;
+	*[Gg]entoo*)
+		asciiAddLine "${bold}${purple}    _-'''-_     "
+		asciiAddLine "${bold}${purple}   /       *    "
+		asciiAddLine "${bold}${purple}  |_    O   \   "
+		asciiAddLine "${bold}${purple}   _->       |> "
+		asciiAddLine "${bold}${purple}  |         /   "
+		asciiAddLine "${bold}${purple}   \_     _*    "
+		asciiAddLine "${bold}${purple}     -...-      ${reset}"
+		space="                "
+		;;
+	*[Ff]edora*)
+		asciiAddLine "${bold}${blue}     _*#####*_    "
+		asciiAddLine "${bold}${blue}    /    ${reset}${bold}__${blue}   \   "
+		asciiAddLine "${bold}${blue}   $    ${reset}${bold}|  |${blue}   $  "
+		asciiAddLine "${bold}${blue}  |   ${reset}${bold}__|__|${blue}    |  "
+		asciiAddLine "${bold}${blue}  |  ${reset}${bold}|  |${blue}      $  "
+		asciiAddLine "${bold}${blue}  |  ${reset}${bold}|__|${blue}    _/   "
+		asciiAddLine "${bold}${blue}  \_________*     ${reset}"
+		space="                  "
+		;;
+	*[Nn]ix*)
+		asciiAddLine "${bold}${blue}    _**___${cyan}/\/\     "
+		asciiAddLine "${bold}${blue}   I______${cyan}\  /${blue}__   "
+		asciiAddLine "${bold}${cyan}    _/ /   \ ${blue}/ /   "
+		asciiAddLine "${bold}${cyan}   /  <    ${blue} > _/   "
+		asciiAddLine "${bold}${cyan}   /_/ ${blue}\\${cyan}___${blue}/${cyan}_${blue}/${cyan}_    "
+		asciiAddLine "${bold}${blue}     /  \\${cyan}___  _I   "
+		asciiAddLine "${bold}${blue}     \/\/ ${cyan}  **     ${reset}"
+		space="                   "
+		;;
+	*[Aa]lpine*)
+		asciiAddLine "${bold}${blue}        __            "
+		asciiAddLine "${bold}${blue}       /  \  __       "
+		asciiAddLine "${bold}${blue}      / /\ \/  \      "
+		asciiAddLine "${bold}${blue}     / /  \ \/\ \     "
+		asciiAddLine "${bold}${blue}    / /    \ \ \ \    "
+		asciiAddLine "${bold}${blue}   / /|     \ \ \ \   "
+		asciiAddLine "${bold}${blue}  /_/_|      \_\ \_\  ${reset}"
+		space="                      "
+		;;
+	*[Ss]use*)
+		asciiAddLine "${bold}${green}  |̈́'**--.__         "
+		asciiAddLine "${bold}${green}         ,_\`*--.    "
+		asciiAddLine "${bold}${green}        /__\    \   "
+		asciiAddLine "${bold}${green}   ____,\_./  ,__\  "
+		asciiAddLine "${bold}${green}   \*._ \`'-*'\`___,  "
+		asciiAddLine "${bold}${green}       \`'*--*' _./  "
+		asciiAddLine "${bold}${green}  --.,,,.----*'     ${reset}"
+		space="                    "
+		;;
+	*[Ss]lack*)
+		asciiAddLine "${bold}${blue}     ,-*##\$##*-,     "
+		asciiAddLine "${bold}${blue}    /  ${reset}${bold},'\`\`'*I${blue}  \    "
+		asciiAddLine "${bold}${blue}   $   ${reset}${bold}\`~--._${blue}    $   "
+		asciiAddLine "${bold}${blue}  |[         ${reset}${bold}\`)${blue}  ]|  "
+		asciiAddLine "${bold}${blue}   $  ${reset}${bold},I*.__.*\`${blue}  $   "
+		asciiAddLine "${bold}${blue}    \ ${reset}${bold}|--------${blue} /    "
+		asciiAddLine "${bold}${blue}     '-*##\$##*-'     ${reset}"
+		space="                     "
+		;;
+	*[Ee]xherbo*)
+		asciiAddLine "${bold}${black}     (\.-~-.o      "
+		asciiAddLine "${bold}${black}     / ${blue}o   O${black} \     "
+		asciiAddLine "${bold}${black}     |${brightred}(${black}+${brightred}¨\`¨${black}*${brightred})${black}|     "
+		asciiAddLine "${bold}${black}      \-_:_-/      "
+		asciiAddLine "${bold}${black}   (=/---=== \)    "
+		asciiAddLine "${bold}${black}   _/ -'-´¨¨´  )_  "
+		asciiAddLine "${bold}${black}  | )¨-,_.,-=/´¨/  "
+		asciiAddLine "${bold}${black}   ´'/_/'---'|__|  "
+		space="                   "
+		;;
+	*[Cc]rux*)
+		asciiAddLine "${bold}${blue}     ,-\"\"-,      "
+		asciiAddLine "${bold}${blue}     |${black}+ ^${blue} |      "
+		asciiAddLine "${bold}${blue}     |${yellow}/_\ ${blue}|_     "
+		asciiAddLine "${bold}${blue}   ,'  ${black}__${blue}  ,\    "
+		asciiAddLine "${bold}${blue}   | -${black}|  \ ${blue}//|   "
+		asciiAddLine "${bold}${yellow}  /¨|${blue}¨-' ${yellow}|${blue}^${yellow}|${blue}¨|   "
+		asciiAddLine "${bold}${yellow}  \_\\${blue}¸${black}\__${yellow}\/${blue}_/    ${reset}"
+		space="                 "
+		;;
+	*[Gg]uix*)
+		asciiAddLine "${bold}${yellow}\`,'-_._          _._-',\`"
+		asciiAddLine "${bold}${yellow}  '-__ \_      _/ __-'  "
+		asciiAddLine "${bold}${yellow}      \  \    /  /      "
+		asciiAddLine "${bold}${yellow}       \  \  /  /       "
+		asciiAddLine "${bold}${yellow}        \  \/  /        "
+		asciiAddLine "${bold}${yellow}         \ /  /         "
+		asciiAddLine "${bold}${yellow}          V__/          ${reset}"
+		space="                        "
+		;;
+	[Gg]nu)
+		asciiAddLine "${bold}  _-;;==-     -==;;-_ "
+		asciiAddLine "${bold} |\/ _-;*\\\//*;+-.\/|"
+		asciiAddLine "${bold} \\\\\\\\\\^¨''¨V¨''¨^//// "
+		asciiAddLine "${bold}  \\\/     @)  \@) \-  "
+		asciiAddLine "${bold}  / .       ¸_ \|-_\  "
+		asciiAddLine "${bold} /_/;      /*  _,/ ¨- "
+		asciiAddLine "${bold} ¨ | ´,  ´\_-=_=\     "
+		asciiAddLine "${bold}    |  ',  ¨´´´/      "
+		asciiAddLine "${bold}     \   ',   >       "
+		asciiAddLine "${bold}           \#\\\      ${reset}"
+		space="                      "
+		;;
+	[Dd]ragonfly)
+		asciiAddLine "${bold} [ ¨',  o${red}^${black}o  ,'¨ ]  "
+		asciiAddLine "${bold}  ´-¸ '.,${red}#${black},.' ¸-´   "
+		asciiAddLine "${bold}  ¸___:=${red}|#|${black}=:___¸   "
+		asciiAddLine "${bold} (    ¸~${red}\#/${black}~¸    )  "
+		asciiAddLine "${bold}  ´'´    ${red}#${black}    ´'´   "
+		asciiAddLine "${bold}${red}         #          "
+		asciiAddLine "${bold}${red}         |          ${reset}"
+		space="                    "
+		;;
+	*[Ff]ree[Bb][Ss][Dd]*)
+		asciiAddLine "${bold}${red}  (^-_-*###*-_-^)   "
+		asciiAddLine "${bold}${red}   \/         \/    "
+		asciiAddLine "${bold}${red}   $   ¤   ¤   $    "
+		asciiAddLine "${bold}${red}  |   _______   |   "
+		asciiAddLine "${bold}${red}   $  \ |T| /  $    "
+		asciiAddLine "${bold}${red}    \_ '-_-' _/     "
+		asciiAddLine "${bold}${red}     '-*###*-'      ${reset}"
+		space="                  "
+		;;
+	*[Oo]pen[Bb][Ss][Dd]*)
+		asciiAddLine "${bold}${yellow}  \,.-|--./      "
+		asciiAddLine "${bold}${yellow}  /',   .  \__   "
+		asciiAddLine "${bold}${yellow} \  .  ${reset}${bold}^  ^${yellow} /    "
+		asciiAddLine "${bold}${yellow} _| . c ${red}U${yellow} ɔ |    "
+		asciiAddLine "${bold}${yellow}  \    .  ,/     "
+		asciiAddLine "${bold}${yellow}  / ,  ,_.\      "
+		asciiAddLine "${bold}${yellow}  '|/\/ '        ${reset}"
+		space="                 "
+		;;
+	*[Nn]et[Bb][Ss][Dd]*)
+		asciiAddLine "${bold} |_\\${red}¨¨-__-¨¨--.__,.--,__     "
+		asciiAddLine "${bold}  |_\\${red}             _-¨-=='¨¨  "  
+		asciiAddLine "${bold}   |_\\${red}           ´´¨-,___    "
+		asciiAddLine "${bold}    |_\\${red}      _¨¨--__--''¨¨¨  "
+		asciiAddLine "${bold}     |_\\${red}--_-¨                "
+		asciiAddLine "${bold}      |_\                    "
+		asciiAddLine "${bold}       |_\                   "
+		asciiAddLine "${bold}        |_\                  ${reset}"
+		space="                             "
+		;;
+	[Pp]lan9)
+		asciiAddLine "${bold} |#\|#\.---.,     "
+		asciiAddLine "${bold}  \#\^¨      1    "
+		asciiAddLine "${bold}   ],    o   o}   "
+		asciiAddLine "${bold}    |      (*)[   "
+		asciiAddLine "${bold}    }       ¨ |   "
+		asciiAddLine "${bold}  ,.[         /   "
+		asciiAddLine "${bold}  <_\____,\_\-\   ${reset}"
+		space="                  "
+		;;
+	 [Ss]eele)
+		asciiAddLine "${bold}  ____________  "
+		asciiAddLine "${bold} -#@#-  | -#@#- "
+		asciiAddLine "${bold}   \    |   /   "
+		asciiAddLine "${bold} -#@#-  | -#@#- "
+		asciiAddLine "${bold}     \  | /     "
+		asciiAddLine "${bold} -#@#-\ |/-#@#- "
+		asciiAddLine "${bold}       \/       "
+		asciiAddLine "${bold}          -#@#- "
+		space="                "
+		;;
+	[Nn]erv)
+		asciiAddLine "${bold}${red}   ^,  ,_-';,   "
+		asciiAddLine "${bold}${red}    ´\\¸|  , ,'  "
+		asciiAddLine "${bold}${black} |\ | L${red}\\¸  ´;,  "
+		asciiAddLine "${bold}${black} | \| |_${red}´\\¸ ´;  "
+		asciiAddLine "${bold}${black}     |) \ ${red}´\\¸ } "
+		asciiAddLine "${bold}${black}     |\  \/ ${red}´\/ ${reset}"
+		space="                "
+		;;
+	[Nn]avi)
+		asciiAddLine "${bold}${cyan}         .         "
+		asciiAddLine "${bold}${cyan}   . ${blue}_+##\$##+_ ${cyan}.   "
+		asciiAddLine "${bold}${cyan}  / ${blue}/^ ${cyan}+#\$#+ ${blue}^\ ${cyan}\  "
+		asciiAddLine "${bold}${cyan} | ${blue}() ${cyan}#|${blue}(${cyan}@${blue})${cyan}|# ${blue}() ${cyan}| "
+		asciiAddLine "${bold}${cyan}  \ ${blue}\, ${cyan}\' '/ ${blue},/ ${cyan}/  "
+		asciiAddLine "${bold}${cyan} . ' ${blue}¨+${cyan}|${blue}#\$#${cyan}|${blue}+¨ ${cyan}' . "
+		asciiAddLine "${bold}${cyan}      ,|   |,      "
+		asciiAddLine "${bold}${cyan}                   ${reset}"
+		space="                   "
+		;;
+	*)
+		# this is a trash can btw
+		asciiAddLine "${bold}  ___________  "
+		asciiAddLine "${bold}  \X#X#X#X#X/  "
+		asciiAddLine "${bold}  \#X#X#X#X#/  "
+		asciiAddLine "${bold}  \X#X#X#X#X/  "
+		asciiAddLine "${bold}  \#X#X#X#X#/  "
+		asciiAddLine "${bold}  \X#X#X#X#X/  "
+		asciiAddLine "${bold}  |#X#X#X#X#|  ${reset}"
+		space="               "
+		;;
 esac
 
-packages=$(
-	if command -v apt-get > /dev/null 2>&1; then
-	   dpkg-query -f '.\n' -W | wc -l
-	elif command -v pacman > /dev/null 2>&1; then
-	   pacman -Qq | wc -l
-	elif command -v dnf > /dev/null 2>&1; then
-	   rpm -qa --queryformat '.\n' | wc -l
-	elif command -v zypper > /dev/null 2>&1; then
-	   rpm -qa --queryformat '.\n' | wc -l
-	elif command -v xbps-query > /dev/null 2>&1; then
-		xbps-query -l | wc -l
-	elif command -v emerge > /dev/null 2>&1; then
-		ls /var/db/pkg/*/* -d | wc -l
-	elif command -v apk > /dev/null 2>&1; then
-		apk info | wc -l
-	elif command -v nix-env > /dev/null 2>&1; then
-		nix-env --query | wc -l
-	else
-	   echo "no"
-	fi
-)
+i=2
 
-if [ "$packages" != "no" ]; then
-	packages_low=$(( $packages * 10 / 12 ))
-	packages_high=$(( $packages * 16 / 10 ))
-	packages="prolly like ${packages_low} to ${packages_high}"
-else
-	packages="stop using a niche distro ya bum"
-fi
+printf "%s\n" "$(eval "echo \"\$line_1\"")"
 
-read -r uptime _ < /proc/uptime
-uptime_seconds=${uptime%%.*}
-uptime_minutes=$(( $uptime_seconds / 60 ))
-uptime_hours=$(( $uptime_minutes / 60 ))
-uptime=$(
-	if [ "$uptime_hours" -ge 10 ]; then
-		echo "${keycolour}${bold}ew get off your computer wtf.${reset} Youve been on for ${uptime_hours} h"
-	elif [ "$uptime_hours" -ge 5 ]; then
-		echo "${keycolour}${bold}go touch some grass, ok?${reset} ${uptime_hours} h"
-	elif [ "$uptime_hours" -ge 1 ]; then
-		echo "${keycolour}${bold}keep on using that computer, computer boy.${reset} ${uptime_minutes} min"
-	elif [ "$uptime_minutes" -ge 30 ]; then
-		echo "${keycolour}${bold}wow, not too much, huh?${reset} ${uptime_minutes} min"
-	else 
-		echo "${keycolour}${bold}computah, slime this guy out.${reset} ${uptime_minutes} min"
-	fi
-)
+while [ "$i" -le "$lineCount" ] || [ "$((i - 1))" -le "$asciiLineCount" ]; do
+    logo_line=$((i - 1))
 
-terminal=$(
-	case "$TERM" in
-		foot)
-			echo "${keycolour}${bold}mmghh... feet :drooling_face: term${reset} =" "$TERM"
-			;;
-		kitty)
-			echo "${keycolour}${bold}kitty? i like them. term ${reset} = cat"
-			;;
-		rxvt-unicode)
-			echo "${keycolour}${bold}the best x11 term btw. term${reset} = " "$TERM"
-			;;
-		*)
-			echo "${keycolour}${bold}prolly a bad term${reset} =" "$TERM"
-			;;
-	esac	
-)
+    eval "line=\${line_$i}"
 
-while read -r key value unit; do
-    [ "$key" = "MemTotal:" ] && {
-        ram=$value
-        break
-    }
-done < /proc/meminfo
-ram_B=$(( ram * 1000 ))
-ram_GB=$(( ram / 1000000 ))
-ram_conclusion=$(
-	if [ "$ram_GB" -ge 63 ]; then
-		echo "$ram_B" "Bytes??? Holy shit are you a datacenter?"
-	elif [ "$ram_GB" -ge 31 ]; then
-		echo "$ram_B" "Bytes.. damn thats quite a bit man.. leave the windows(11) open"
-	elif [ "$ram_GB" -ge 15 ]; then
-		echo "$ram_B" "Bytes, meh pretty average"
-	elif [ "$ram_GB" -ge 7 ]; then
-		echo "$ram_B" "Bytes, you better hope GTA6 never releases"
-	else
-			echo "$ram_B" "Bytes only..? We all think you deserve some more man"
-	fi
-)
+    if [ "$logo_line" -le "$asciiLineCount" ]; then
+        eval "logo=\${ascii_$logo_line}"
+    else
+        logo="$space"
+    fi
 
-if [ "$not_confused" = "1" ]; then
-	wm="something serious ig"
-	sea="dude thought"
-	krnl="it was actually gonna be serious"
-	uptime="${yellow}uptime${reset} = a million billion hours cause youre a chud"
-	packages="ZERO"
-	terminal="${yellow}term${reset} = cool retro term (for LOSERS btw (just use a crt like me, LOSER))"
-	cpu="intel 4004"
-	ram_conclusion="69GB"
-	gpu="rtx half life 3 ready 9090"
-fi
-
-cat <<EOF
-  sudo apt ddos ${accentcolour}${bold}$USER${reset}@${accentcolour}${bold}$hostname${reset}
-$logo1 ${keycolour}${bold}${distroecho}${reset} = ${distroShort} user BTW
-$logo2 ${keycolour}${bold}window manager${reset} = $wm ($server)
-$logo3 ${keycolour}${bold}like.. a seashell?${reset} = $sea
-$logo4 ${keycolour}${bold}highest ranking non-General grade officer${reset} = $krnl
-$logo5 $uptime
-$logo6 ${keycolour}${bold}aliexpress packages${reset} = $packages
-$logo7 $terminal
-  well ${accentcolour}specs${reset}.. I suppose ik what those are"
-$space ${keycolour2}cpu${reset} = $cpu
-$space ${keycolour2}gpu${reset} = $gpu
-$space ${keycolour2}ai food${reset} = $ram_conclusion
-EOF
+    printf "%s %s\n" "$logo" "$line"
+    i=$((i + 1))
+done
 
 # Ik its badly made btw
+
+# to do list:
+	# more logos:
+		# derive
+		# bedrock
+		# kiss
+	# make more configurable
+	# make logos be 1 instead of 7
+	# more compatibility for distros
+	# bsd support
+	# config file instead of this file
+	# logo file instead of this file
