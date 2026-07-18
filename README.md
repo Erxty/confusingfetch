@@ -19,20 +19,21 @@ confetch
 
 ## flags
 
--v, --version
--h, --help
+-v, --version : shows version of confetch
 
--l, --logo
+-h, --help : help message, explains itself
 
--a, --accent
+-l, --logo : changes logos
 
--k, --key
+-a, --accent : changes accent colour
 
--L, --larp
+-k, --key : changes main colour
 
--C, --confused
+-L, --larp : larpity larp larp larp 
 
--s, --shorter
+-C, --confused : confuses confetch even more
+
+-s, --shorter : slightly shorter output
 
 ## configuration
 
