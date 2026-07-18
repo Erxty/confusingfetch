@@ -1,6 +1,8 @@
 # confusingfetch
 a fetch tool thats.. confused?
 
+![example](screenshots/normalVoid.png)
+
 ## Installation
 
 1. Download the confetch file or copy it to your own
@@ -91,8 +93,13 @@ there isnt any bsd support YET except for there being logos for them
 
 this is only made to work on linux so far, but should at least be pretty posix compliant
 
+## examples
+
+![example2](screenshots/plan9min.png)
+![example3](screenshots/dragonflymin.png)
+
 ## license
-WTFPL — do what the f*** you want. See [LICENSE](LICENSE).
+WTFPL — do what the fuck you want. See [LICENSE](LICENSE).
 
 ---
 
