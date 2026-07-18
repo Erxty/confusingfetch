@@ -35,8 +35,8 @@ terminal
 ram 
 cpu 
 gpu"
-# actually no need to take anyhting out of $enabled,
-# just add what you want to remove into $disabled
+
+# remove a module from $enabled and put it into $disabled to disable it
 disabled="
 "
 
