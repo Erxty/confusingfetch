@@ -93,8 +93,19 @@ there isnt any bsd support YET except for there being logos for them
 
 this is only made to work on linux so far, but should at least be pretty posix compliant
 
+everything is only tested on my pc cause im too lazy to boot up a vm or one of my laptops
+
+my pcs info:
+- void linux glibc
+- labwc (wayland)
+- ryzen 5 5600
+- rx 6700 xt
+- 16gb ddr4 3200mhz
+>will probably start testing on other stuff soon so that i can properly add support for them
+
 ## examples
 
+![example](screenshots/normalVoid.png)
 ![example2](screenshots/plan9min.png)
 ![example3](screenshots/dragonflymin.png)
 
