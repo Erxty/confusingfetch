@@ -18,6 +18,10 @@ green=$(printf '\033[32m')
 yellow=$(printf '\033[33m')
 red=$(printf '\033[31m')
 
+orange=$(printf '\033[38;5;208m')
+
+foreground=$(printf '\033[0m' printf '\033[1m')
+
 brightred=$(printf '\033[0;91m')
 
 # decides what modules are in the output. possible options are:
@@ -83,6 +87,8 @@ colouroption() {
         purple) eval "$1=\$purple" ;;
         white)  eval "$1=\$white" ;;
         black)  eval "$1=\$black" ;;
+        orange) eval "$1=\$orange" ;;
+        foreground) eval "$1=\$foreground" ;;
         *)
             echo "whats that colour: '$2'?"
             exit 1
@@ -97,7 +103,7 @@ setAutoColour() {
 
 randomlogo() {
 	read -r up _ < /proc/uptime
-	num=$(( ${up%%.*} % 21 ))
+	num=$(( ${up%%.*} % 25 ))
 
 	case "$num" in
     	0) logooption="tux" ;;
@@ -121,6 +127,9 @@ randomlogo() {
 	    18) logooption="nerv" ;;
 	    19) logooption="seele" ;;
 	    20) logooption="navi" ;;
+	    21) logooption="aperture" ;;
+	    22) logooption="lambda" ;;
+	    23) logooption="blackmesa" ;;
     	*) logooption="trash" ;;
 	esac
 }
@@ -132,20 +141,18 @@ helpoptions() {
 			echo "    tux, debian, nix, void, arch, fedora, freebsd,"
 			echo "    alpine, slackware, dragonfly, suse, netbsd,"
 			echo "    openbsd, plan9, gentoo, gnu, guix, crux, exherbo,"
-			echo "    nerv, seele, navi, and trash (fallback)"
+			echo "    nerv, seele, navi, blackmesa, lambda, aperture,"
+			echo "    and trash (fallback)"
 			;;
 		accent)
 			echo "  accent options:"
-			echo "    white, purple, blue, cyan, green, yellow, red"
+			echo "    white, purple, blue, cyan, green, yellow, red,"
+			echo "    orange, black, and foreground"
 			;;
 		key)
 			echo "  key options:"
-			echo "    white, purple, blue, cyan, green, yellow, red"
-			;;
-		key2)
-			echo "  key2 options:"
-			echo "    white, purple, blue, cyan, green, yellow, red"
-			;;
+			echo "    white, purple, blue, cyan, green, yellow, red,"
+			echo "    orange, black, and foreground"			;;
 		version)
 			echo "  nothing to help with... what??"
 			echo "    are you stupid?"
@@ -153,7 +160,7 @@ helpoptions() {
 		larp)
 			echo "  larp options:"
 			echo "    with logos: everything that --logo has"
-			echo "    ^^ except for the non distros like seele or nerv"
+			echo "    ^^ except for the non distros like seele or lamda"
 			echo "    without correct logos: anything lol"
 			;;
 		confused)
@@ -264,11 +271,11 @@ case "$distro" in
 		;;
 	*[Ss]lack*)
 		distroecho="okay grandpa"
-		setAutoColour "$blue" "$black"
+		setAutoColour "$blue" "$foreground"
 		;;
 	*[Nn]et[Bb][Ss][Dd]*)
 		distroecho="using it just to be niche icel"
-		setAutoColour "$red" "$black"
+		setAutoColour "$red" "$foreground"
 		;;
 	*[Dd]ragonfly*)
 		distroecho="dont go flying little"
@@ -284,7 +291,7 @@ case "$distro" in
 		;;
 	*[Pp]lan9*)
 		distroecho="tru unix.."
-		setAutoColour "$black" "$purple"
+		setAutoColour "$foreground" "$purple"
 		;;
 	*[Gg]uix*)
 		distroecho="nix, but better i suppose"
@@ -454,7 +461,7 @@ for module in $enabled; do
 
 		gpu)
 			if command -v lspci >/dev/null; then
-   				gpuNumber=$(lspci | grep VGA | awk '{print $1; exit}')
+   				gpuNumber=$(lspci -k | grep -E "(VGA|3D|DISPLAY)" | awk '{print $1; exit}')
     
 				gpu=$(lspci -v -s "${gpuNumber}" | awk -F': ' '/Subsystem:/{print $2}')
 				[ -z "$gpu" ] && gpu=$(lspci -mm -s "${gpuNumber}" | awk -F'"' '{print $6}' | cut -d'[' -f1)
@@ -474,26 +481,25 @@ for module in $enabled; do
         		[ "$key" = "MemAvailable:" ] && { ramAvail=$value; break; }
 		    done < /proc/meminfo
 		    
-    		ramUsed=$(( ramTotal - ramAvail ))
-
     		ramTotal_GB_full=$(( ramTotal / 1000000 ))
-		    ramTotal_tenth=$(( ramTotal / 100000 ))
-		    ramUsed_tenth=$(( ramUsed / 100000 ))
+    		ramTotal_clean=$(( ramTotal / 1000000 * 1000000 ))
 
-		    ramTotal_GB="$(( ramTotal_tenth / 10 )).$(( ramTotal_tenth % 10 ))"
-		    ramUsed_GB="$(( ramUsed_tenth / 10 )).$(( ramUsed_tenth % 10 ))"
+    		ramUsed=$(( ramTotal_clean - ramAvail ))
+    		
+		    ramUsed_hundreth=$(( ramUsed / 10000 ))
+		    ramUsed_GB="$(( ramUsed_hundreth / 100 )).$(( ramUsed_hundreth % 100 ))"
 
 			ram=$(
         		if [ "$ramTotal_GB_full" -ge 63 ]; then
-					echo "${ramUsed_GB}GB/${ramTotal_GB}GB?? sharing is caring btw"
+					echo "${ramUsed_GB}GB/${ramTotal_GB_full}GB?? sharing is caring btw"
 		        elif [ "$ramTotal_GB_full" -ge 31 ]; then
-					echo "${ramUsed_GB}GB/${ramTotal_GB}GB, a couple browser tabs worth"
+					echo "${ramUsed_GB}GB/${ramTotal_GB_full}GB, a couple browser tabs worth"
         		elif [ "$ramTotal_GB_full" -ge 15 ]; then
-					echo "${ramUsed_GB}GB/${ramTotal_GB}GB, pretty average tbh"
+					echo "${ramUsed_GB}GB/${ramTotal_GB_full}GB, pretty average tbh"
         		elif [ "$ramTotal_GB_full" -ge 7 ]; then
-					echo "${ramUsed_GB}GB/${ramTotal_GB}GB, you better hope GTA 6 never releases"
+					echo "${ramUsed_GB}GB/${ramTotal_GB_full}GB, you better hope GTA 6 never releases"
 				else
-					echo "only ${ramUsed_GB}GB/${ramTotal_GB}GB..? treat yourself, please"
+					echo "only ${ramUsed_GB}GB/${ramTotal_GB_full}GB..? treat yourself, please"
 				fi
 			)
     		ramkey="ai food"
@@ -507,8 +513,8 @@ done
 case "$logooption" in 
 	[Tt]ux)
 		asciiAddLine "${bold}      .--.     "
-		asciiAddLine "${bold}     |@${yellow}_${reset}${bold}@ |    "
-		asciiAddLine "${bold}     |${yellow}:_/${reset}${bold} |    "
+		asciiAddLine "${bold}     |@${yellow}_${foreground}@ |    "
+		asciiAddLine "${bold}     |${yellow}:_/${foreground} |    "
 		asciiAddLine "${bold}    //   \ \   "
 		asciiAddLine "${bold}   (J     l )  "
 		asciiAddLine "${bold}  /'\_   _/'\  "
@@ -518,9 +524,9 @@ case "$logooption" in
 	*[Vv]oid*)
 		asciiAddLine "${bold}${green}     _*###*_    "
 		asciiAddLine "${bold}${green}            \\   "
-		asciiAddLine "${bold}${green}   $   ${reset}${bold}/\`\ ${green}  $  "
-		asciiAddLine "${bold}${green}  |   ${reset}${bold}| @ |${green}   | "
-		asciiAddLine "${bold}${green}   $   ${reset}${bold}\_/${green}   $  "
+		asciiAddLine "${bold}${green}   $   ${foreground}/\`\ ${green}  $  "
+		asciiAddLine "${bold}${green}  |   ${foreground}| @ |${green}   | "
+		asciiAddLine "${bold}${green}   $   ${foreground}\_/${green}   $  "
 		asciiAddLine "${bold}${green}    \_          "
 		asciiAddLine "${bold}${green}      *###*\`    ${reset}"
 		space="                "
@@ -557,11 +563,11 @@ case "$logooption" in
 		;;
 	*[Ff]edora*)
 		asciiAddLine "${bold}${blue}     _*#####*_    "
-		asciiAddLine "${bold}${blue}    /    ${reset}${bold}__${blue}   \   "
-		asciiAddLine "${bold}${blue}   $    ${reset}${bold}|  |${blue}   $  "
-		asciiAddLine "${bold}${blue}  |   ${reset}${bold}__|__|${blue}    |  "
-		asciiAddLine "${bold}${blue}  |  ${reset}${bold}|  |${blue}      $  "
-		asciiAddLine "${bold}${blue}  |  ${reset}${bold}|__|${blue}    _/   "
+		asciiAddLine "${bold}${blue}    /${foreground}    __${blue}   \   "
+		asciiAddLine "${bold}${blue}   $ ${foreground}   |  |${blue}   $  "
+		asciiAddLine "${bold}${blue}  |  ${foreground} __|__|${blue}    |  "
+		asciiAddLine "${bold}${blue}  |  ${foreground}|  |${blue}      $  "
+		asciiAddLine "${bold}${blue}  |  ${foreground}|__|${blue}    _/   "
 		asciiAddLine "${bold}${blue}  \_________*     ${reset}"
 		space="                  "
 		;;
@@ -597,18 +603,18 @@ case "$logooption" in
 		;;
 	*[Ss]lack*)
 		asciiAddLine "${bold}${blue}     ,-*##\$##*-,     "
-		asciiAddLine "${bold}${blue}    /  ${reset}${bold},'\`\`'*I${blue}  \    "
-		asciiAddLine "${bold}${blue}   $   ${reset}${bold}\`~--._${blue}    $   "
-		asciiAddLine "${bold}${blue}  |[         ${reset}${bold}\`)${blue}  ]|  "
-		asciiAddLine "${bold}${blue}   $  ${reset}${bold},I*.__.*\`${blue}  $   "
-		asciiAddLine "${bold}${blue}    \ ${reset}${bold}|--------${blue} /    "
+		asciiAddLine "${bold}${blue}    /  ${foreground},'\`\`'*I${blue}  \    "
+		asciiAddLine "${bold}${blue}   $   ${foreground}\`~--._${blue}    $   "
+		asciiAddLine "${bold}${blue}  |[         ${foreground}\`)${blue}  ]|  "
+		asciiAddLine "${bold}${blue}   $  ${foreground},I*.__.*\`${blue}  $   "
+		asciiAddLine "${bold}${blue}    \ ${foreground}|--------${blue} /    "
 		asciiAddLine "${bold}${blue}     '-*##\$##*-'     ${reset}"
 		space="                     "
 		;;
 	*[Ee]xherbo*)
 		asciiAddLine "${bold}${black}     (\.-~-.o      "
-		asciiAddLine "${bold}${black}     / ${blue}o   O${black} \     "
-		asciiAddLine "${bold}${black}     |${brightred}(${black}+${brightred}¨\`¨${black}*${brightred})${black}|     "
+		asciiAddLine "${bold}${black}     / ${blue}o   O${foreground} \     "
+		asciiAddLine "${bold}${black}     |${brightred}(${foreground}+${brightred}¨\`¨${foreground}*${brightred})${foreground}|     "
 		asciiAddLine "${bold}${black}      \-_:_-/      "
 		asciiAddLine "${bold}${black}   (=/---=== \)    "
 		asciiAddLine "${bold}${black}   _/ -'-´¨¨´  )_  "
@@ -618,12 +624,12 @@ case "$logooption" in
 		;;
 	*[Cc]rux*)
 		asciiAddLine "${bold}${blue}     ,-\"\"-,      "
-		asciiAddLine "${bold}${blue}     |${black}+ ^${blue} |      "
+		asciiAddLine "${bold}${blue}     |${foreground}+ ^${blue} |      "
 		asciiAddLine "${bold}${blue}     |${yellow}/_\ ${blue}|_     "
-		asciiAddLine "${bold}${blue}   ,'  ${black}__${blue}  ,\    "
-		asciiAddLine "${bold}${blue}   | -${black}|  \ ${blue}//|   "
+		asciiAddLine "${bold}${blue}   ,'  ${foreground}__${blue}  ,\    "
+		asciiAddLine "${bold}${blue}   | -${foreground}|  \ ${blue}//|   "
 		asciiAddLine "${bold}${yellow}  /¨|${blue}¨-' ${yellow}|${blue}^${yellow}|${blue}¨|   "
-		asciiAddLine "${bold}${yellow}  \_\\${blue}¸${black}\__${yellow}\/${blue}_/    ${reset}"
+		asciiAddLine "${bold}${yellow}  \_\\${blue}¸${foreground}\__${yellow}\/${blue}_/    ${reset}"
 		space="                 "
 		;;
 	*[Gg]uix*)
@@ -650,11 +656,11 @@ case "$logooption" in
 		space="                      "
 		;;
 	[Dd]ragonfly)
-		asciiAddLine "${bold} [ ¨',  o${red}^${black}o  ,'¨ ]  "
-		asciiAddLine "${bold}  ´-¸ '.,${red}#${black},.' ¸-´   "
-		asciiAddLine "${bold}  ¸___:=${red}|#|${black}=:___¸   "
-		asciiAddLine "${bold} (    ¸~${red}\#/${black}~¸    )  "
-		asciiAddLine "${bold}  ´'´    ${red}#${black}    ´'´   "
+		asciiAddLine "${bold} [ ¨',  o${red}^${foreground}o  ,'¨ ]  "
+		asciiAddLine "${bold}  ´-¸ '.,${red}#${foreground},.' ¸-´   "
+		asciiAddLine "${bold}  ¸___:=${red}|#|${foreground}=:___¸   "
+		asciiAddLine "${bold} (    ¸~${red}\#/${foreground}~¸    )  "
+		asciiAddLine "${bold}  ´'´    ${red}#${foreground}    ´'´   "
 		asciiAddLine "${bold}${red}         #          "
 		asciiAddLine "${bold}${red}         |          ${reset}"
 		space="                    "
@@ -667,12 +673,12 @@ case "$logooption" in
 		asciiAddLine "${bold}${red}   $  \ |T| /  $    "
 		asciiAddLine "${bold}${red}    \_ '-_-' _/     "
 		asciiAddLine "${bold}${red}     '-*###*-'      ${reset}"
-		space="                  "
+		space="                    "
 		;;
 	*[Oo]pen[Bb][Ss][Dd]*)
 		asciiAddLine "${bold}${yellow}  \,.-|--./      "
 		asciiAddLine "${bold}${yellow}  /',   .  \__   "
-		asciiAddLine "${bold}${yellow} \  .  ${reset}${bold}^  ^${yellow} /    "
+		asciiAddLine "${bold}${yellow} \  .  ${foreground}^  ^${yellow} /    "
 		asciiAddLine "${bold}${yellow} _| . c ${red}U${yellow} ɔ |    "
 		asciiAddLine "${bold}${yellow}  \    .  ,/     "
 		asciiAddLine "${bold}${yellow}  / ,  ,_.\      "
@@ -730,6 +736,38 @@ case "$logooption" in
 		asciiAddLine "${bold}${cyan}      ,|   |,      "
 		asciiAddLine "${bold}${cyan}                   ${reset}"
 		space="                   "
+		;;
+	[Aa]perture)
+		asciiAddLine "${bold}${blue}      _-----,_       "
+		asciiAddLine "${bold}${blue}   _¨´¨- _   \ ¨_    "
+		asciiAddLine "${bold}${blue}  /    _--¨-,\   \   "
+		asciiAddLine "${bold}${blue} /--¨;/       | / \  "
+		asciiAddLine "${bold}${blue} |  ,/        /´  |  "
+		asciiAddLine "${bold}${blue} \ / |       /;_--/  "
+		asciiAddLine "${bold}${blue}  \   \'-_--¨    /   "
+		asciiAddLine "${bold}${blue}   ¨_ \   ¨ -_¸_¨    "
+		asciiAddLine "${bold}${blue}      ¨^-----¨       "
+		space="                     "
+		;;
+	[bB]lack[Mm]esa)
+		asciiAddLine "${bold}    _*###*_    "
+		asciiAddLine "${bold}   /       \   "
+		asciiAddLine "${bold}  $         $  "
+		asciiAddLine "${bold} |[   .---. ]| "
+		asciiAddLine "${bold}  \$___|    \\$  "
+		asciiAddLine "${bold}   \_     _/   "
+		asciiAddLine "${bold}     *###*     "
+		space="               "
+		;;
+	[Ll]ambda)
+		asciiAddLine "${bold}${orange}    _*###*_    "
+		asciiAddLine "${bold}${orange}   /  _    \   "
+		asciiAddLine "${bold}${orange}  $    \    $  "
+		asciiAddLine "${bold}${orange} |[   / \   ]| "
+		asciiAddLine "${bold}${orange}  $  /   \_ $  "
+		asciiAddLine "${bold}${orange}   \_     _/   "
+		asciiAddLine "${bold}${orange}     *###*     "
+		space="               "
 		;;
 	*)
 		# this is a trash can btw
