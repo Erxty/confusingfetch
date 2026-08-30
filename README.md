@@ -60,6 +60,7 @@ currently package amount fetching is only supported for the following package ma
 - portage
 - apk
 - nix
+- pkg (bsd)
 
 >ill prolly add more package managers soon. Im js a lil lazy 
 
@@ -67,9 +68,11 @@ there are only ascii for the following
 - void
 - debian
 - arch
+- ubuntu (ik..)
 - fedora
 - opensuse
 - gentoo
+- chimera
 - nix
 - alpine
 - slackware
@@ -87,18 +90,20 @@ non operating systems:
 - seele
 - nerv
 - navi
+- blackmesa
+- lambda
+- aperture science
 
 feel free to suggest ascii to add, but addition isnt guaranteed.
 
-there isnt any bsd support YET except for there being logos for them
-
-this is only made to work on linux so far, but should at least be pretty posix compliant
+*BSD support is in the making, and is at LEAST semi working. Tested on FreeBSD and NetBSD (not sure if i tested on Net, i don' remember tbh) in virtual machines
 
 everything is only tested on my pc cause im too lazy to boot up a vm or one of my laptops
+> progress,,, I tested confetch in a couple VMs, but not many
 
 my pcs info:
-- void linux glibc
-- labwc (wayland)
+- chimera linux
+- swindle (wayland)
 - ryzen 5 5600
 - rx 6700 xt
 - 16gb ddr4 3200mhz

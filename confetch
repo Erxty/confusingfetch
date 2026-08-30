@@ -3,42 +3,25 @@
 # This fetch never lies, so you should always trust it.
 # No need to edit this file unless yuore STUPID and want it to break.
 
-version="version 1.6"
+version="version 1.7"
 
-bold=$(printf '\033[1m')
-reset=$(printf '\033[0m')
-
-black=$(printf '\033[0;30m')
-white=$(printf '\033[37m')
-
-purple=$(printf '\033[35m')
-blue=$(printf '\033[34m')
-cyan=$(printf '\033[36m')
-green=$(printf '\033[32m')
-yellow=$(printf '\033[33m')
-red=$(printf '\033[31m')
-
-orange=$(printf '\033[38;5;208m')
-
-foreground=$(printf '\033[0m' printf '\033[1m')
-
-brightred=$(printf '\033[0;91m')
-
-# decides what modules are in the output. possible options are:
-	# title wm kernel shell cpu gpu ram packages terminal uptime distro
+# decides what modules are in the output
 # the order changes depending on this aswell just so yk
 enabled="
 title 
 distro 
 wm 
 shell 
-kernel 
+init
+kernel
 packages 
-uptime 
-terminal 
-ram 
-cpu 
-gpu"
+uptime
+terminal
+host
+memory
+cpu
+gpu
+"
 
 # remove a module from $enabled and put it into $disabled to disable it
 disabled="
@@ -63,9 +46,47 @@ logooption="$distro"
 # past here is where the ugly ugly magic happens. Do NOT go further unless youre me.
 # when writing this, only me and god knew what i was writing. Now only i know.
 
-hostname=$(cat /etc/hostname)
+bold=$(printf '\033[1m')
+reset=$(printf '\033[0m')
+foreground=$(printf '\033[0m\033[1m')
+
+black=$(printf '\033[0;30m')
+red=$(printf '\033[31m')
+green=$(printf '\033[32m')
+yellow=$(printf '\033[33m')
+blue=$(printf '\033[34m')
+purple=$(printf '\033[35m')
+cyan=$(printf '\033[36m')
+white=$(printf '\033[37m')
+
+brightblack=$(printf '\033[0;90m')
+brightred=$(printf '\033[91m')
+brightgreen=$(printf '\033[92m')
+brightyellow=$(printf '\033[93m')
+brightblue=$(printf '\033[94m')
+brightpurple=$(printf '\033[95m')
+brightcyan=$(printf '\033[96m')
+brightwhite=$(printf '\033[97m')
+
+hostname=$(uname -n)
 lineCount=0
 asciiLineCount=0
+
+kernelType=$(uname -s)
+
+os=$(
+	case "$kernelType" in
+		[Ll]inux)
+			echo "Linux"
+			;;
+		*[Bb][Ss][Dd] | [Dd]ragon[Ff]ly)
+			echo "BSD"
+			;;
+		*)
+			echo "tf are you using?"
+			;;
+	esac
+)
 
 addLine() {
     lineCount=$((lineCount + 1))
@@ -111,7 +132,7 @@ randomlogo() {
 	    2) logooption="void" ;;
 	    3) logooption="arch" ;;
 	    4) logooption="gentoo" ;;
-    	5) logooption="fedora" ;;
+	    5) logooption="fedora" ;;
 	    6) logooption="nix" ;;
 	    7) logooption="alpine" ;;
 	    8) logooption="dragonfly" ;;
@@ -130,6 +151,8 @@ randomlogo() {
 	    21) logooption="aperture" ;;
 	    22) logooption="lambda" ;;
 	    23) logooption="blackmesa" ;;
+	    24) logooption="chimera" ;;
+	    25) logooption="ubuntu" ;;
     	*) logooption="trash" ;;
 	esac
 }
@@ -139,7 +162,7 @@ helpoptions() {
 		logo)
 			echo "  logo options:"
 			echo "    tux, debian, nix, void, arch, fedora, freebsd,"
-			echo "    alpine, slackware, dragonfly, suse, netbsd,"
+			echo "    alpine, slackware, chimera, dragonfly, suse, netbsd,"
 			echo "    openbsd, plan9, gentoo, gnu, guix, crux, exherbo,"
 			echo "    nerv, seele, navi, blackmesa, lambda, aperture,"
 			echo "    and trash (fallback)"
@@ -166,10 +189,6 @@ helpoptions() {
 		confused)
 			echo "  i get that youre a lil confused"
 			echo "    but this doesnt have options"
-			;;
-		shorter)
-			echo "  no options buddy.."
-			echo "    will make a separate module flag in the future"
 			;;
 		*)
 			echo "  what? Wtf do you need help with??"
@@ -205,11 +224,6 @@ while [ $# -gt 0 ]; do
 			randomlogo
 			shift
 			;;
-		--shorter|-s)
-			# how i usually run this (yes, i use this instead of fastfetch)
-			disabled="cpu gpu ram terminal"
-			shift
-			;;
 		--help|-h)
 			cat <<EOF
 			
@@ -221,7 +235,6 @@ while [ $# -gt 0 ]; do
     -a, --accent COLOUR   | changes your accent irl
     -k, --key COLOUR      | changes your house keys
     -C, --confused        | confuses you
-    -s, --shorter         | gets rid of a few modules
     -L. --larp NAME       | sudo W opsec. Larpity larp
 
 EOF
@@ -252,6 +265,10 @@ case "$distro" in
 	*[Gg]entoo*)
 		distroecho="have a lot of freetime, yeah?"
 		setAutoColour "$purple" "$cyan"
+		;;
+	*[Cc]himera*)
+		distroecho="alpine, but bloated"
+		setAutoColour "$purple" "$blue"
 		;;
 	*[Ff]edora*)
 		distroecho="test rabbit for RHEL"
@@ -336,11 +353,19 @@ for module in $enabled; do
 		 	wm="something niche probably"
 	 		case "$WAYLAND_DISPLAY" in
 	    		"")
-		        	server=X11
-		        	wmkey="window manager"
+	    			case "$XAUTHORITY" in
+	    			"")
+	    				server="TTY"
+	    				wmkey="no window to manager"
+	    				;;
+	    			*)
+		        		server="X11"
+		        		wmkey="window manager"
+		        		;;
+		        	esac
     		    ;;
 	    		*)
-		         	server=Wayland
+		         	server="Wayland"
 		         	wmkey="compositor"
     		    ;;
 		 	esac
@@ -355,16 +380,40 @@ for module in $enabled; do
 		 	addLine "$shell"
 		;;
 
+		init)
+			init="$(cat /proc/1/comm)"
+			initkey="personal identity disorder 1"
+			init="${bold}${keycolour}${initkey}${reset} = ${init}"
+			addLine "$init"
+		;;
+
 		kernel)
 			kernel=$(uname -r )
-			kernelkey="highest ranking non-General grade officer"
+			kernelkey="highest ranking non-general grade officer"
 			kernel="${bold}${keycolour}${kernelkey}${reset} = ${kernel}"
 		  	addLine "$kernel"
 		;;
+		host)
+			host=$(cat /sys/devices/virtual/dmi/id/product_name)
+			hostkey="rock that can think"
+			host="${bold}${keycolour}${hostkey}${reset} = ${host}"
+			
+			addLine "$host"
+		;;
 
 		uptime)
-			read -r uptime _ < /proc/uptime
-			uptime_seconds=${uptime%%.*}
+			case "$os" in
+				Linux)
+					read -r uptime _ < /proc/uptime
+					uptime_seconds=${uptime%%.*}
+					;;
+				BSD)
+					uptime=$(sysctl -n kern.boottime | cut -d',' -f1 | cut -d ' ' -f4)
+					uptime_now=$(date +%s)
+					uptime_seconds=$((uptime_now - uptime))
+					;;
+			esac
+
 			uptime_minutes=$(( $uptime_seconds / 60 ))
 			uptime_hours=$(( $uptime_minutes / 60 ))
 			if [ "$uptime_hours" -ge 10 ]; then
@@ -391,27 +440,38 @@ for module in $enabled; do
 		;;
 
 		packages)
-			packages=$(
-				if command -v apt-get > /dev/null 2>&1; then
-		   			dpkg-query -f '.\n' -W | wc -l
-				elif command -v pacman > /dev/null 2>&1; then
-		   			pacman -Qq | wc -l
-				elif command -v dnf > /dev/null 2>&1; then
-		   			rpm -qa --queryformat '.\n' | wc -l
-				elif command -v zypper > /dev/null 2>&1; then
-		   			rpm -qa --queryformat '.\n' | wc -l
-				elif command -v xbps-query > /dev/null 2>&1; then
-					xbps-query -l | wc -l
-				elif command -v emerge > /dev/null 2>&1; then
-					ls /var/db/pkg/*/* -d | wc -l
-				elif command -v apk > /dev/null 2>&1; then
-					apk info | wc -l
-				elif command -v nix-env > /dev/null 2>&1; then
-					nix-env --query | wc -l
-				else
-		   			echo "no"
-				fi
-			)
+			case "$os" in
+				Linux)
+					packages=$(
+						if command -v apt-get > /dev/null 2>&1; then
+		   					dpkg-query -f '.\n' -W | wc -l
+						elif command -v pacman > /dev/null 2>&1; then
+				   			pacman -Qq | wc -l
+						elif command -v dnf > /dev/null 2>&1; then
+				   			rpm -qa --queryformat '.\n' | wc -l
+						elif command -v zypper > /dev/null 2>&1; then
+		   					rpm -qa --queryformat '.\n' | wc -l
+						elif command -v xbps-query > /dev/null 2>&1; then
+							xbps-query -l | wc -l
+						elif command -v emerge > /dev/null 2>&1; then
+							ls /var/db/pkg/*/* -d | wc -l
+						elif command -v apk > /dev/null 2>&1; then
+							grep 'P:' /lib/apk/db/installed | wc -l
+						elif command -v nix-env > /dev/null 2>&1; then
+							nix-env --query | wc -l
+						else
+				   			echo "no"
+						fi
+						)
+					;;
+				BSD)
+					packages=$(
+						if command -v pkg > /dev/null 2>&1; then
+							pkg info -a | wc -l
+						fi
+						)
+					;;
+			esac
 
 			if [ "$packages" != "no" ]; then
 				packages_low=$(( $packages * 10 / 12 ))
@@ -453,34 +513,65 @@ for module in $enabled; do
 		;;
 
 		cpu)
-	 		cpu=$( awk -F ': ' '/model name*:*/{print $2; exit}' /proc/cpuinfo )
+			case "$os" in
+				Linux)
+	 				cpu=$( awk -F ': ' '/model name*:*/{print $2; exit}' /proc/cpuinfo )
+	 				;;
+	 			BSD)
+	 				case "$kernelType" in
+                		[Ff]ree[Bb][Ss][Dd]* | [Dd]ragon[Ff]ly* | [Nn]et[Bb][Ss][Dd]*)
+	 						cpu=$( sysctl -n hw.model )
+	 						;;
+	 					[Oo]pen[Bb][Ss][Dd])
+	 						;;
+	 				esac
+	 				;;
+	 		esac
 		 	cpukey="cpu"
 	 		cpu="${space}${bold}${keycolour}${cpukey}${reset} = ${cpu}"
 		  	addLine "$cpu"
 		;;
 
 		gpu)
-			if command -v lspci >/dev/null; then
-   				gpuNumber=$(lspci -k | grep -E "(VGA|3D|DISPLAY)" | awk '{print $1; exit}')
+			case "$os" in
+				Linux)
+					if command -v lspci >/dev/null; then
+   						gpuNumber=$(lspci -k | grep -E "(VGA|3D|DISPLAY)" | awk '{print $1; exit}')
     
-				gpu=$(lspci -v -s "${gpuNumber}" | awk -F': ' '/Subsystem:/{print $2}')
-				[ -z "$gpu" ] && gpu=$(lspci -mm -s "${gpuNumber}" | awk -F'"' '{print $6}' | cut -d'[' -f1)
-			else
-	    		gpu="you dont have one, you poor bastard"
-			fi
+						gpu=$(lspci -v -s "${gpuNumber}" | awk -F': ' '/Subsystem:/{print $2}')
+						[ -z "$gpu" ] && gpu=$(lspci -mm -s "${gpuNumber}" | awk -F'"' '{print $6}' | cut -d'[' -f1)
+					else
+	    				gpu="you dont have one, you poor bastard"
+					fi
+					;;
+				BSD)
+					gpu=$( pciconf -lv | grep -B 4 -F "VGA" | grep -E "^[[:space:]]+device[[:space:]]*=" | cut -d "'" -f2 )
+					;;
+			esac
 			gpukey="gpu"
 			gpu="${bold}${keycolour}${gpukey}${reset} = ${gpu}"
 		  	addLine "$gpu"
 		;;
 		
 		ram)
-    		while read -r key value unit; do
-		        [ "$key" = "MemTotal:" ] && { ramTotal=$value; break; }
-		    done < /proc/meminfo
-		    while read -r key value unit; do
-        		[ "$key" = "MemAvailable:" ] && { ramAvail=$value; break; }
-		    done < /proc/meminfo
-		    
+			case "$os" in
+				[Ll]inux)
+    				while read -r key value unit; do
+		        		[ "$key" = "MemTotal:" ] && { ramTotal=$value; break; }
+		    		done < /proc/meminfo
+		    		while read -r key value unit; do
+        				[ "$key" = "MemAvailable:" ] && { ramAvail=$value; break; }
+		    		done < /proc/meminfo
+		    		;;
+		    	[Ff]ree[Bb][Ss][Dd])
+		    		ramTotal="$(( $( sysctl -n hw.physmem) / 1000 ))"
+		    		hwPage="$( sysctl -n hw.pagesize)"
+		    		ramInac="$(( $( sysctl -n vm.stats.vm.v_inactive_count) * hwPage ))"
+		    		ramCache="$(( $( sysctl -n vm.stats.vm.v_cache_count) * hwPage ))"
+		    		ramFree="$(( $( sysctl -n vm.stats.vm.v_free_count) * hwPage ))"
+		    		ramAvail="$(( (ramInac + ramFree + ramCache) / 1000 ))"
+		    		;;
+		    esac	
     		ramTotal_GB_full=$(( ramTotal / 1000000 ))
     		ramTotal_clean=$(( ramTotal / 1000000 * 1000000 ))
 
@@ -561,6 +652,16 @@ case "$logooption" in
 		asciiAddLine "${bold}${purple}     -...-      ${reset}"
 		space="                "
 		;;
+	*[Cc]himera*)
+		asciiAddLine "${bold}${blue}  P7W5K ${red}l;       "
+		asciiAddLine "${bold}${blue}  HV*'  ${red}l;       "
+		asciiAddLine "${bold}${blue}  L' ${red},;*'´ ¸¸¸¸  "
+		asciiAddLine "${bold}${purple}  ,  ${red}H:   ;KI**  "
+		asciiAddLine "${bold}${purple}  P, ${red}';._j*  ,T  "
+		asciiAddLine "${bold}${purple}  K6*, ${red}¨'¨ ,*0N  "
+		asciiAddLine "${bold}${purple}  L9DCM* ${red}*NCLEJ  ${reset}"
+		space="                 "
+		;;
 	*[Ff]edora*)
 		asciiAddLine "${bold}${blue}     _*#####*_    "
 		asciiAddLine "${bold}${blue}    /${foreground}    __${blue}   \   "
@@ -609,6 +710,16 @@ case "$logooption" in
 		asciiAddLine "${bold}${blue}   $  ${foreground},I*.__.*\`${blue}  $   "
 		asciiAddLine "${bold}${blue}    \ ${foreground}|--------${blue} /    "
 		asciiAddLine "${bold}${blue}     '-*##\$##*-'     ${reset}"
+		space="                     "
+		;;
+	*[Uu]buntu*)
+		asciiAddLine "${bold}${red}         ###*_()     "
+		asciiAddLine "${bold}${red}      /,  ´¨'\\\      "
+		asciiAddLine "${bold}${red}    ,$/       |$     "
+		asciiAddLine "${bold}${red}  ()|(               "
+		asciiAddLine "${bold}${red}    '$\       |$     "
+		asciiAddLine "${bold}${red}      \'  ¸,.//      "
+		asciiAddLine "${bold}${red}         ###*¨()     "
 		space="                     "
 		;;
 	*[Ee]xherbo*)
@@ -668,7 +779,7 @@ case "$logooption" in
 	*[Ff]ree[Bb][Ss][Dd]*)
 		asciiAddLine "${bold}${red}  (^-_-*###*-_-^)   "
 		asciiAddLine "${bold}${red}   \/         \/    "
-		asciiAddLine "${bold}${red}   $   ¤   ¤   $    "
+		asciiAddLine "${bold}${red}   $   @   @   $    "
 		asciiAddLine "${bold}${red}  |   _______   |   "
 		asciiAddLine "${bold}${red}   $  \ |T| /  $    "
 		asciiAddLine "${bold}${red}    \_ '-_-' _/     "
@@ -746,7 +857,7 @@ case "$logooption" in
 		asciiAddLine "${bold}${blue} \ / |       /;_--/  "
 		asciiAddLine "${bold}${blue}  \   \'-_--¨    /   "
 		asciiAddLine "${bold}${blue}   ¨_ \   ¨ -_¸_¨    "
-		asciiAddLine "${bold}${blue}      ¨^-----¨       "
+		asciiAddLine "${bold}${blue}      ¨^-----¨       ${reset}"
 		space="                     "
 		;;
 	[bB]lack[Mm]esa)
@@ -756,17 +867,18 @@ case "$logooption" in
 		asciiAddLine "${bold} |[   .---. ]| "
 		asciiAddLine "${bold}  \$___|    \\$  "
 		asciiAddLine "${bold}   \_     _/   "
-		asciiAddLine "${bold}     *###*     "
+		asciiAddLine "${bold}     *###*     ${reset}"
 		space="               "
 		;;
 	[Ll]ambda)
+		orange=$(printf '\033[38;5;208m')
 		asciiAddLine "${bold}${orange}    _*###*_    "
 		asciiAddLine "${bold}${orange}   /  _    \   "
 		asciiAddLine "${bold}${orange}  $    \    $  "
 		asciiAddLine "${bold}${orange} |[   / \   ]| "
 		asciiAddLine "${bold}${orange}  $  /   \_ $  "
 		asciiAddLine "${bold}${orange}   \_     _/   "
-		asciiAddLine "${bold}${orange}     *###*     "
+		asciiAddLine "${bold}${orange}     *###*     ${reset}"
 		space="               "
 		;;
 	*)
@@ -811,6 +923,6 @@ done
 	# make more configurable
 	# make logos be 1 instead of 7
 	# more compatibility for distros
-	# bsd support
+	# better bsd support
 	# config file instead of this file
 	# logo file instead of this file
