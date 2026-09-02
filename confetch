@@ -3,18 +3,18 @@
 # This fetch never lies, so you should always trust it.
 # No need to edit this file unless yuore STUPID and want it to break.
 
-version="version 1.7"
+version="version 1.8"
 
 # decides what modules are in the output
 # the order changes depending on this aswell just so yk
 enabled="
 title 
 distro 
-wm 
+wm
+kernel
 shell 
 init
-kernel
-packages 
+packages
 uptime
 terminal
 host
@@ -46,27 +46,46 @@ logooption="$distro"
 # past here is where the ugly ugly magic happens. Do NOT go further unless youre me.
 # when writing this, only me and god knew what i was writing. Now only i know.
 
-bold=$(printf '\033[1m')
-reset=$(printf '\033[0m')
-foreground=$(printf '\033[0m\033[1m')
+# bold
+bld=$(printf '\033[1m')
+# reset
+rst=$(printf '\033[0m')
+# foreground
+fg=$(printf '\033[0m\033[1m')
 
-black=$(printf '\033[0;30m')
-red=$(printf '\033[31m')
-green=$(printf '\033[32m')
-yellow=$(printf '\033[33m')
-blue=$(printf '\033[34m')
-purple=$(printf '\033[35m')
-cyan=$(printf '\033[36m')
-white=$(printf '\033[37m')
+# black
+C30=$(printf '\033[30m')
+# red
+C31=$(printf '\033[31m')
+# green
+C32=$(printf '\033[32m')
+# yellow
+C33=$(printf '\033[33m')
+# blue
+C34=$(printf '\033[34m')
+# purple
+C35=$(printf '\033[35m')
+# cyan
+C36=$(printf '\033[36m')
+# white
+C37=$(printf '\033[37m')
 
-brightblack=$(printf '\033[0;90m')
-brightred=$(printf '\033[91m')
-brightgreen=$(printf '\033[92m')
-brightyellow=$(printf '\033[93m')
-brightblue=$(printf '\033[94m')
-brightpurple=$(printf '\033[95m')
-brightcyan=$(printf '\033[96m')
-brightwhite=$(printf '\033[97m')
+# bright black
+C90=$(printf '\033[90m')
+# bright red
+C91=$(printf '\033[91m')
+# bright green
+C92=$(printf '\033[92m')
+# bright yellow
+C93=$(printf '\033[93m')
+# bright blue
+C94=$(printf '\033[94m')
+# bright purple
+C95=$(printf '\033[95m')
+# bright cyan
+C96=$(printf '\033[96m')
+# bright white
+C97=$(printf '\033[97m')
 
 hostname=$(uname -n)
 lineCount=0
@@ -100,15 +119,14 @@ asciiAddLine() {
 
 colouroption() {
     case "$2" in
-        red)    eval "$1=\$red" ;;
-        blue)   eval "$1=\$blue" ;;
-        green)  eval "$1=\$green" ;;
-        yellow) eval "$1=\$yellow" ;;
-        cyan)   eval "$1=\$cyan" ;;
-        purple) eval "$1=\$purple" ;;
-        white)  eval "$1=\$white" ;;
-        black)  eval "$1=\$black" ;;
-        orange) eval "$1=\$orange" ;;
+        red)    eval "$1=\$C31" ;;
+        blue)   eval "$1=\$C34" ;;
+        green)  eval "$1=\$C32" ;;
+        yellow) eval "$1=\$C33" ;;
+        cyan)   eval "$1=\$C36" ;;
+        purple) eval "$1=\$C35" ;;
+        white)  eval "$1=\$C37" ;;
+        black)  eval "$1=\$C30" ;;
         foreground) eval "$1=\$foreground" ;;
         *)
             echo "whats that colour: '$2'?"
@@ -124,10 +142,10 @@ setAutoColour() {
 
 randomlogo() {
 	read -r up _ < /proc/uptime
-	num=$(( ${up%%.*} % 25 ))
+	num=$(( ${up%%.*} % 27 ))
 
 	case "$num" in
-    	0) logooption="tux" ;;
+	    0) logooption="tux" ;;
 	    1) logooption="debian" ;;
 	    2) logooption="void" ;;
 	    3) logooption="arch" ;;
@@ -153,7 +171,7 @@ randomlogo() {
 	    23) logooption="blackmesa" ;;
 	    24) logooption="chimera" ;;
 	    25) logooption="ubuntu" ;;
-    	*) logooption="trash" ;;
+	    *) logooption="trash" ;;
 	esac
 }
 
@@ -170,12 +188,12 @@ helpoptions() {
 		accent)
 			echo "  accent options:"
 			echo "    white, purple, blue, cyan, green, yellow, red,"
-			echo "    orange, black, and foreground"
+			echo "    black, and foreground"
 			;;
 		key)
 			echo "  key options:"
 			echo "    white, purple, blue, cyan, green, yellow, red,"
-			echo "    orange, black, and foreground"			;;
+			echo "    black, and foreground"			;;
 		version)
 			echo "  nothing to help with... what??"
 			echo "    are you stupid?"
@@ -252,79 +270,83 @@ done
 case "$distro" in 
 	*[Vv]oid*)
 		distroecho="$USER died to the void"
-		setAutoColour "$green" "$red"
+		setAutoColour "$C32" "$fg"
 		;;
 	*[Aa]rch*)
 		distroecho="too minimal for the average, not minimal enough for the experienced"
-		setAutoColour "$blue" "$red"
+		setAutoColour "$C34" "$C31"
 		;;
 	*[Dd]ebian*)
 		distroecho="packages from the jurassic period lol"
-		setAutoColour "$red" "$purple"
+		setAutoColour "$C31" "$C35"
 		;;
 	*[Gg]entoo*)
 		distroecho="have a lot of freetime, yeah?"
-		setAutoColour "$purple" "$cyan"
+		setAutoColour "$C35" "$C36"
 		;;
 	*[Cc]himera*)
 		distroecho="alpine, but bloated"
-		setAutoColour "$purple" "$blue"
+		setAutoColour "$C35" "$C34"
 		;;
 	*[Ff]edora*)
 		distroecho="test rabbit for RHEL"
-		setAutoColour "$blue" "$green"
+		setAutoColour "$C34" "$C32"
 		;;
 	*[Nn]ix*)
 		distroecho="soystemd land"
-		setAutoColour "$cyan" "$blue"
+		setAutoColour "$C35" "$C34"
 		;;
 	*[Aa]lpine*)
 		distroecho="im musling it"
-		setAutoColour "$blue" "$yellow"
+		setAutoColour "$C34" "$C33"
 		;;
 	*[Ss]use*)
 		distroecho="fedora EU edition"
-		setAutoColour "$green" "$yellow"
+		setAutoColour "$C32" "$C33"
 		;;
 	*[Ss]lack*)
 		distroecho="okay grandpa"
-		setAutoColour "$blue" "$foreground"
+		setAutoColour "$C34" "$fg"
 		;;
 	*[Nn]et[Bb][Ss][Dd]*)
 		distroecho="using it just to be niche icel"
-		setAutoColour "$red" "$foreground"
+		setAutoColour "$C31" "$fg"
 		;;
 	*[Dd]ragonfly*)
 		distroecho="dont go flying little"
-		setAutoColour "$red" "$green"
+		setAutoColour "$C31" "$C32"
 		;;
 	*[Ff]ree[Bb][Ss][Dd]*)
 		distroecho="$USER met the devil"
-		setAutoColour "$red" "$red"
+		setAutoColour "$C31" "$C31"
 		;;
 	*[Oo]pen[Bb][Ss][Dd]*)
 		distroecho="paranoid, are we?"
-		setAutoColour "$yellow" "$blue"
+		setAutoColour "$C33" "$C34"
 		;;
 	*[Pp]lan9*)
 		distroecho="tru unix.."
-		setAutoColour "$foreground" "$purple"
+		setAutoColour "$fg" "$C35"
 		;;
 	*[Gg]uix*)
 		distroecho="nix, but better i suppose"
-		setAutoColour "$yellow" "$blue"
+		setAutoColour "$C33" "$C34"
+		;;
+	*56*)
+		distroecho="what? Wth is this??"
+		setAutoColour "$fg" "$C33"
 		;;
 	*[Cc]rux*)
 		distroecho="funny little penguin.."
-		setAutoColour "$blue" "$yellow"
+		setAutoColour "$C34" "$C33"
 		;;
 	*[Ee]xherbo*)
 		distroecho="ANYTHING to be niche ig"
-		setAutoColour "$blue" "$brightred"
+		setAutoColour "$C34" "$C91"
 		;;
 	*)
 		distroecho="ay this isnt supported! Stop using confetch!!"
-		setAutoColour "$red" "$red"
+		setAutoColour "$C31" "$C31"
 		;;
 esac
 
@@ -336,18 +358,18 @@ for module in $enabled; do
 	case "$module" in
 
 		title)
-		  titlekey="sudo apt ddos"
-		  title="${bold}${accentcolour}$USER${reset}@${bold}${accentcolour}${hostname}${reset}"
-		  title="   ${reset}${titlekey}${reset} ${title}"
-		  addLine "$title"
-		;;
+			titlekey="sudo apt ddos"
+		  	title="${bld}${accentcolour}$USER${fg}@${bld}${accentcolour}${hostname}${rst}"
+		  	title="   ${rst}${titlekey}${rst} ${title}"
+		  	addLine "$title"
+			;;
 
 		distro)
 			distrokey="${distroecho}"
 			distromod="${distroShort} user BTW"
-			distromod="${bold}${keycolour}${distrokey}${reset} = ${distromod}"
+			distromod="${bld}${keycolour}${distrokey}${rst} = ${distromod}"
 		  	addLine "$distromod"
-		;;
+			;;
 
 		wm)
 		 	wm="something niche probably"
@@ -363,43 +385,43 @@ for module in $enabled; do
 		        		wmkey="window manager"
 		        		;;
 		        	esac
-    		    ;;
+    		    		;;
 	    		*)
 		         	server="Wayland"
 		         	wmkey="compositor"
-    		    ;;
+    		    		;;
 		 	esac
-	 		wm="${bold}${keycolour}${wmkey}${reset} = ${wm} (${server})"
+	 		wm="${bld}${keycolour}${wmkey}${rst} = ${wm} (${server})"
 		  	addLine "$wm"
-		 ;;
+			;;
 
 		shell)
 			shell="${SHELL##*/}"
 	 		shellkey="like.. a seashell?"
-		 	shell="${bold}${keycolour}${shellkey}${reset} = ${shell}"
+		 	shell="${bld}${keycolour}${shellkey}${rst} = ${shell}"
 		 	addLine "$shell"
-		;;
+			;;
 
 		init)
 			init="$(cat /proc/1/comm)"
 			initkey="personal identity disorder 1"
-			init="${bold}${keycolour}${initkey}${reset} = ${init}"
+			init="${bld}${keycolour}${initkey}${rst} = ${init}"
 			addLine "$init"
-		;;
+			;;
 
 		kernel)
 			kernel=$(uname -r )
 			kernelkey="highest ranking non-general grade officer"
-			kernel="${bold}${keycolour}${kernelkey}${reset} = ${kernel}"
+			kernel="${bld}${keycolour}${kernelkey}${rst} = ${kernel}"
 		  	addLine "$kernel"
-		;;
+			;;
+
 		host)
 			host=$(cat /sys/devices/virtual/dmi/id/product_name)
 			hostkey="rock that can think"
-			host="${bold}${keycolour}${hostkey}${reset} = ${host}"
-			
+			host="${bld}${keycolour}${hostkey}${rst} = ${host}"
 			addLine "$host"
-		;;
+			;;
 
 		uptime)
 			case "$os" in
@@ -435,9 +457,9 @@ for module in $enabled; do
 				uptimekey="computah, slime this guy out. "
 				uptime="${uptime_minutes} minutes"
 			fi
-			uptime="${bold}${keycolour}${uptimekey}${reset} ${uptime}"
+			uptime="${bld}${keycolour}${uptimekey}${rst} ${uptime}"
 		  	addLine "$uptime"
-		;;
+			;;
 
 		packages)
 			case "$os" in
@@ -481,9 +503,9 @@ for module in $enabled; do
 				packages="stop using a niche distro ya bum"
 			fi
 			packageskey="aliexpress packages"
-			packages="${bold}${keycolour}${packageskey}${reset} = ${packages}"
+			packages="${bld}${keycolour}${packageskey}${rst} = ${packages}"
 		  	addLine "$packages"
-		;;
+			;;
 
 		terminal)
 			case "$TERM" in
@@ -508,9 +530,9 @@ for module in $enabled; do
 					terminal="$TERM"
 				;;
 			esac
-			terminal="${bold}${keycolour}${terminalkey}${reset} = ${terminal}"
+			terminal="${bld}${keycolour}${terminalkey}${rst} = ${terminal}"
 		  	addLine "$terminal"
-		;;
+			;;
 
 		cpu)
 			case "$os" in
@@ -519,7 +541,7 @@ for module in $enabled; do
 	 				;;
 	 			BSD)
 	 				case "$kernelType" in
-                		[Ff]ree[Bb][Ss][Dd]* | [Dd]ragon[Ff]ly* | [Nn]et[Bb][Ss][Dd]*)
+                				[Ff]ree[Bb][Ss][Dd]* | [Dd]ragon[Ff]ly* | [Nn]et[Bb][Ss][Dd]*)
 	 						cpu=$( sysctl -n hw.model )
 	 						;;
 	 					[Oo]pen[Bb][Ss][Dd])
@@ -528,9 +550,9 @@ for module in $enabled; do
 	 				;;
 	 		esac
 		 	cpukey="cpu"
-	 		cpu="${space}${bold}${keycolour}${cpukey}${reset} = ${cpu}"
+	 		cpu="${space}${bld}${keycolour}${cpukey}${rst} = ${cpu}"
 		  	addLine "$cpu"
-		;;
+			;;
 
 		gpu)
 			case "$os" in
@@ -549,347 +571,356 @@ for module in $enabled; do
 					;;
 			esac
 			gpukey="gpu"
-			gpu="${bold}${keycolour}${gpukey}${reset} = ${gpu}"
+			gpu="${bld}${keycolour}${gpukey}${rst} = ${gpu}"
 		  	addLine "$gpu"
-		;;
+			;;
 		
 		ram)
 			case "$os" in
 				[Ll]inux)
-    				while read -r key value unit; do
-		        		[ "$key" = "MemTotal:" ] && { ramTotal=$value; break; }
-		    		done < /proc/meminfo
-		    		while read -r key value unit; do
-        				[ "$key" = "MemAvailable:" ] && { ramAvail=$value; break; }
-		    		done < /proc/meminfo
-		    		;;
-		    	[Ff]ree[Bb][Ss][Dd])
-		    		ramTotal="$(( $( sysctl -n hw.physmem) / 1000 ))"
-		    		hwPage="$( sysctl -n hw.pagesize)"
-		    		ramInac="$(( $( sysctl -n vm.stats.vm.v_inactive_count) * hwPage ))"
-		    		ramCache="$(( $( sysctl -n vm.stats.vm.v_cache_count) * hwPage ))"
-		    		ramFree="$(( $( sysctl -n vm.stats.vm.v_free_count) * hwPage ))"
-		    		ramAvail="$(( (ramInac + ramFree + ramCache) / 1000 ))"
-		    		;;
-		    esac	
-    		ramTotal_GB_full=$(( ramTotal / 1000000 ))
-    		ramTotal_clean=$(( ramTotal / 1000000 * 1000000 ))
+    					while read -r key value unit; do
+		       		 		[ "$key" = "MemTotal:" ] && { ramTotal=$value; break; }
+		    			done < /proc/meminfo
+		    			while read -r key value unit; do
+        					[ "$key" = "MemAvailable:" ] && { ramAvail=$value; break; }
+		    			done < /proc/meminfo
+		    			;;
+		    		[Ff]ree[Bb][Ss][Dd])
+		    			ramTotal="$(( $( sysctl -n hw.physmem) / 1000 ))"
+		    			hwPage="$( sysctl -n hw.pagesize)"
+		  	  		ramInac="$(( $( sysctl -n vm.stats.vm.v_inactive_count) * hwPage ))"
+		    			ramCache="$(( $( sysctl -n vm.stats.vm.v_cache_count) * hwPage ))"
+		    			ramFree="$(( $( sysctl -n vm.stats.vm.v_free_count) * hwPage ))"
+		    			ramAvail="$(( (ramInac + ramFree + ramCache) / 1000 ))"
+		    			;;
+		    	esac	
+    			ramTotal_GB_full=$(( ramTotal / 1000000 ))
+	    		ramTotal_clean=$(( ramTotal / 1000000 * 1000000 ))
 
-    		ramUsed=$(( ramTotal_clean - ramAvail ))
+    			ramUsed=$(( ramTotal_clean - ramAvail ))
     		
-		    ramUsed_hundreth=$(( ramUsed / 10000 ))
-		    ramUsed_GB="$(( ramUsed_hundreth / 100 )).$(( ramUsed_hundreth % 100 ))"
+			    ramUsed_hundreth=$(( ramUsed / 10000 ))
+		   	ramUsed_GB="$(( ramUsed_hundreth / 100 )).$(( ramUsed_hundreth % 100 ))"
 
 			ram=$(
-        		if [ "$ramTotal_GB_full" -ge 63 ]; then
+        			if [ "$ramTotal_GB_full" -ge 63 ]; then
 					echo "${ramUsed_GB}GB/${ramTotal_GB_full}GB?? sharing is caring btw"
-		        elif [ "$ramTotal_GB_full" -ge 31 ]; then
+			        elif [ "$ramTotal_GB_full" -ge 31 ]; then
 					echo "${ramUsed_GB}GB/${ramTotal_GB_full}GB, a couple browser tabs worth"
-        		elif [ "$ramTotal_GB_full" -ge 15 ]; then
+        			elif [ "$ramTotal_GB_full" -ge 15 ]; then
 					echo "${ramUsed_GB}GB/${ramTotal_GB_full}GB, pretty average tbh"
-        		elif [ "$ramTotal_GB_full" -ge 7 ]; then
+        			elif [ "$ramTotal_GB_full" -ge 7 ]; then
 					echo "${ramUsed_GB}GB/${ramTotal_GB_full}GB, you better hope GTA 6 never releases"
 				else
 					echo "only ${ramUsed_GB}GB/${ramTotal_GB_full}GB..? treat yourself, please"
 				fi
 			)
-    		ramkey="ai food"
-    		ram="${bold}${keycolour}${ramkey}${reset} = ${ram}"
-    		addLine "$ram"
-    		;;
+    			ramkey="ai food"
+    			ram="${bld}${keycolour}${ramkey}${rst} = ${ram}"
+    			addLine "$ram"
+    			;;
 
 	esac
 done
 
 case "$logooption" in 
 	[Tt]ux)
-		asciiAddLine "${bold}      .--.     "
-		asciiAddLine "${bold}     |@${yellow}_${foreground}@ |    "
-		asciiAddLine "${bold}     |${yellow}:_/${foreground} |    "
-		asciiAddLine "${bold}    //   \ \   "
-		asciiAddLine "${bold}   (J     l )  "
-		asciiAddLine "${bold}  /'\_   _/'\  "
-		asciiAddLine "${bold}  \___)=(___/  ${reset}"
+		asciiAddLine "${bld}      .--.     "
+		asciiAddLine "${bld}     |@${C33}_${fg}@ |    "
+		asciiAddLine "${bld}     |${C33}:_/${fg} |    "
+		asciiAddLine "${bld}    //   \ \   "
+		asciiAddLine "${bld}   (J     l )  "
+		asciiAddLine "${bld}  /'\_   _/'\  "
+		asciiAddLine "${bld}  \___)=(___/  ${rst}"
 		space="               "
 		;;
 	*[Vv]oid*)
-		asciiAddLine "${bold}${green}     _*###*_    "
-		asciiAddLine "${bold}${green}            \\   "
-		asciiAddLine "${bold}${green}   $   ${foreground}/\`\ ${green}  $  "
-		asciiAddLine "${bold}${green}  |   ${foreground}| @ |${green}   | "
-		asciiAddLine "${bold}${green}   $   ${foreground}\_/${green}   $  "
-		asciiAddLine "${bold}${green}    \_          "
-		asciiAddLine "${bold}${green}      *###*\`    ${reset}"
+		asciiAddLine "${bld}${C32}     _*###*_    "
+		asciiAddLine "${bld}${C32}            \\   "
+		asciiAddLine "${bld}${C32}   $   ${fg}/\`\ ${C32}  $  "
+		asciiAddLine "${bld}${C32}  |   ${fg}| @ |${C32}   | "
+		asciiAddLine "${bld}${C32}   $   ${fg}\_/${C32}   $  "
+		asciiAddLine "${bld}${C32}    \_          "
+		asciiAddLine "${bld}${C32}      *###*\`    ${rst}"
 		space="                "
 		;;
 	*[Dd]ebian*)
-		asciiAddLine "${bold}${red}     ______    "
-		asciiAddLine "${bold}${red}    /  __  \   "
-		asciiAddLine "${bold}${red}   /  /  \  |  "
-		asciiAddLine "${bold}${red}  |  |     /   "
-		asciiAddLine "${bold}${red}   \  '-_-'    "
-		asciiAddLine "${bold}${red}    \          "
-		asciiAddLine "${bold}${red}     '-__      ${reset}"
+		asciiAddLine "${bld}${C31}     ______    "
+		asciiAddLine "${bld}${C31}    /  __  \   "
+		asciiAddLine "${bld}${C31}   /  /  \  |  "
+		asciiAddLine "${bld}${C31}  |  |     /   "
+		asciiAddLine "${bld}${C31}   \  '-_-'    "
+		asciiAddLine "${bld}${C31}    \          "
+		asciiAddLine "${bld}${C31}     '-__      ${rst}"
 		space="               "
 		;;
 	*[Aa]rch*)
-		asciiAddLine "${bold}${blue}        /\        "
-		asciiAddLine "${bold}${blue}       /  \       "
-		asciiAddLine "${bold}${blue}      /    \      "
-		asciiAddLine "${bold}${blue}     /  __  \     "
-		asciiAddLine "${bold}${blue}    /  |  |  \    "
-		asciiAddLine "${bold}${blue}   / _/    \_ \   "
-		asciiAddLine "${bold}${blue}  /.'        '.\  ${reset}"
+		asciiAddLine "${bld}${C34}        /\        "
+		asciiAddLine "${bld}${C34}       /  \       "
+		asciiAddLine "${bld}${C34}      /    \      "
+		asciiAddLine "${bld}${C34}     /  __  \     "
+		asciiAddLine "${bld}${C34}    /  |  |  \    "
+		asciiAddLine "${bld}${C34}   / _/    \_ \   "
+		asciiAddLine "${bld}${C34}  /.'        '.\  ${rst}"
 		space="                  "
 		;;
 	*[Gg]entoo*)
-		asciiAddLine "${bold}${purple}    _-'''-_     "
-		asciiAddLine "${bold}${purple}   /       *    "
-		asciiAddLine "${bold}${purple}  |_    O   \   "
-		asciiAddLine "${bold}${purple}   _->       |> "
-		asciiAddLine "${bold}${purple}  |         /   "
-		asciiAddLine "${bold}${purple}   \_     _*    "
-		asciiAddLine "${bold}${purple}     -...-      ${reset}"
+		asciiAddLine "${bld}${C35}    _-'''-_     "
+		asciiAddLine "${bld}${C35}   /       *    "
+		asciiAddLine "${bld}${C35}  |_    O   \   "
+		asciiAddLine "${bld}${C35}   _->       |> "
+		asciiAddLine "${bld}${C35}  |         /   "
+		asciiAddLine "${bld}${C35}   \_     _*    "
+		asciiAddLine "${bld}${C35}     -...-      ${rst}"
 		space="                "
 		;;
 	*[Cc]himera*)
-		asciiAddLine "${bold}${blue}  P7W5K ${red}l;       "
-		asciiAddLine "${bold}${blue}  HV*'  ${red}l;       "
-		asciiAddLine "${bold}${blue}  L' ${red},;*'´ ¸¸¸¸  "
-		asciiAddLine "${bold}${purple}  ,  ${red}H:   ;KI**  "
-		asciiAddLine "${bold}${purple}  P, ${red}';._j*  ,T  "
-		asciiAddLine "${bold}${purple}  K6*, ${red}¨'¨ ,*0N  "
-		asciiAddLine "${bold}${purple}  L9DCM* ${red}*NCLEJ  ${reset}"
+		asciiAddLine "${bld}${C34}  P7W5K ${C31}l;       "
+		asciiAddLine "${bld}${C34}  HV*'  ${C31}l;       "
+		asciiAddLine "${bld}${C34}  L' ${C31},;*'´ ¸¸¸¸  "
+		asciiAddLine "${bld}${C35}  ,  ${C31}H:   ;KI**  "
+		asciiAddLine "${bld}${C35}  P, ${C31}';._j*  ,T  "
+		asciiAddLine "${bld}${C35}  K6*, ${C31}¨'¨ ,*0N  "
+		asciiAddLine "${bld}${C35}  L9DCM* ${C31}*NCLEJ  ${rst}"
 		space="                 "
 		;;
 	*[Ff]edora*)
-		asciiAddLine "${bold}${blue}     _*#####*_    "
-		asciiAddLine "${bold}${blue}    /${foreground}    __${blue}   \   "
-		asciiAddLine "${bold}${blue}   $ ${foreground}   |  |${blue}   $  "
-		asciiAddLine "${bold}${blue}  |  ${foreground} __|__|${blue}    |  "
-		asciiAddLine "${bold}${blue}  |  ${foreground}|  |${blue}      $  "
-		asciiAddLine "${bold}${blue}  |  ${foreground}|__|${blue}    _/   "
-		asciiAddLine "${bold}${blue}  \_________*     ${reset}"
+		asciiAddLine "${bld}${C34}     _*#####*_    "
+		asciiAddLine "${bld}${C34}    /${fg}    __${C34}   \   "
+		asciiAddLine "${bld}${C34}   $ ${fg}   |  |${C34}   $  "
+		asciiAddLine "${bld}${C34}  |  ${fg} __|__|${C34}    |  "
+		asciiAddLine "${bld}${C34}  |  ${fg}|  |${C34}      $  "
+		asciiAddLine "${bld}${C34}  |  ${fg}|__|${C34}    _/   "
+		asciiAddLine "${bld}${C34}  \_________*     ${rst}"
 		space="                  "
 		;;
 	*[Nn]ix*)
-		asciiAddLine "${bold}${blue}    _**___${cyan}/\/\     "
-		asciiAddLine "${bold}${blue}   I______${cyan}\  /${blue}__   "
-		asciiAddLine "${bold}${cyan}    _/ /   \ ${blue}/ /   "
-		asciiAddLine "${bold}${cyan}   /  <    ${blue} > _/   "
-		asciiAddLine "${bold}${cyan}   /_/ ${blue}\\${cyan}___${blue}/${cyan}_${blue}/${cyan}_    "
-		asciiAddLine "${bold}${blue}     /  \\${cyan}___  _I   "
-		asciiAddLine "${bold}${blue}     \/\/ ${cyan}  **     ${reset}"
+		asciiAddLine "${bld}${C34}    _**___${C36}/\/\     "
+		asciiAddLine "${bld}${C34}   I______${C36}\  /${C34}__   "
+		asciiAddLine "${bld}${C36}    _/ /   \ ${C34}/ /   "
+		asciiAddLine "${bld}${C36}   /  <    ${C34} > _/   "
+		asciiAddLine "${bld}${C36}   /_/ ${C34}\\${C36}___${C34}/${C36}_${C34}/${C36}_    "
+		asciiAddLine "${bld}${C34}     /  \\${C36}___  _I   "
+		asciiAddLine "${bld}${C34}     \/\/ ${C36}  **     ${rst}"
 		space="                   "
 		;;
 	*[Aa]lpine*)
-		asciiAddLine "${bold}${blue}        __            "
-		asciiAddLine "${bold}${blue}       /  \  __       "
-		asciiAddLine "${bold}${blue}      / /\ \/  \      "
-		asciiAddLine "${bold}${blue}     / /  \ \/\ \     "
-		asciiAddLine "${bold}${blue}    / /    \ \ \ \    "
-		asciiAddLine "${bold}${blue}   / /|     \ \ \ \   "
-		asciiAddLine "${bold}${blue}  /_/_|      \_\ \_\  ${reset}"
+		asciiAddLine "${bld}${C34}        __            "
+		asciiAddLine "${bld}${C34}       /  \  __       "
+		asciiAddLine "${bld}${C34}      / /\ \/  \      "
+		asciiAddLine "${bld}${C34}     / /  \ \/\ \     "
+		asciiAddLine "${bld}${C34}    / /    \ \ \ \    "
+		asciiAddLine "${bld}${C34}   / /|     \ \ \ \   "
+		asciiAddLine "${bld}${C34}  /_/_|      \_\ \_\  ${rst}"
 		space="                      "
 		;;
 	*[Ss]use*)
-		asciiAddLine "${bold}${green}  |̈́'**--.__         "
-		asciiAddLine "${bold}${green}         ,_\`*--.    "
-		asciiAddLine "${bold}${green}        /__\    \   "
-		asciiAddLine "${bold}${green}   ____,\_./  ,__\  "
-		asciiAddLine "${bold}${green}   \*._ \`'-*'\`___,  "
-		asciiAddLine "${bold}${green}       \`'*--*' _./  "
-		asciiAddLine "${bold}${green}  --.,,,.----*'     ${reset}"
+		asciiAddLine "${bld}${C32}  |̈́'**--.__         "
+		asciiAddLine "${bld}${C32}         ,_\`*--.    "
+		asciiAddLine "${bld}${C32}        /__\    \   "
+		asciiAddLine "${bld}${C32}   ____,\_./  ,__\  "
+		asciiAddLine "${bld}${C32}   \*._ \`'-*'\`___,  "
+		asciiAddLine "${bld}${C32}       \`'*--*' _./  "
+		asciiAddLine "${bld}${C32}  --.,,,.----*'     ${rst}"
 		space="                    "
 		;;
 	*[Ss]lack*)
-		asciiAddLine "${bold}${blue}     ,-*##\$##*-,     "
-		asciiAddLine "${bold}${blue}    /  ${foreground},'\`\`'*I${blue}  \    "
-		asciiAddLine "${bold}${blue}   $   ${foreground}\`~--._${blue}    $   "
-		asciiAddLine "${bold}${blue}  |[         ${foreground}\`)${blue}  ]|  "
-		asciiAddLine "${bold}${blue}   $  ${foreground},I*.__.*\`${blue}  $   "
-		asciiAddLine "${bold}${blue}    \ ${foreground}|--------${blue} /    "
-		asciiAddLine "${bold}${blue}     '-*##\$##*-'     ${reset}"
+		asciiAddLine "${bld}${C34}     ,-*##\$##*-,     "
+		asciiAddLine "${bld}${C34}    /  ${fg},'\`\`'*I${C34}  \    "
+		asciiAddLine "${bld}${C34}   $   ${fg}\`~--._${C34}    $   "
+		asciiAddLine "${bld}${C34}  |[         ${fg}\`)${C34}  ]|  "
+		asciiAddLine "${bld}${C34}   $  ${fg},I*.__.*\`${C34}  $   "
+		asciiAddLine "${bld}${C34}    \ ${fg}|--------${C34} /    "
+		asciiAddLine "${bld}${C34}     '-*##\$##*-'     ${rst}"
 		space="                     "
 		;;
 	*[Uu]buntu*)
-		asciiAddLine "${bold}${red}         ###*_()     "
-		asciiAddLine "${bold}${red}      /,  ´¨'\\\      "
-		asciiAddLine "${bold}${red}    ,$/       |$     "
-		asciiAddLine "${bold}${red}  ()|(               "
-		asciiAddLine "${bold}${red}    '$\       |$     "
-		asciiAddLine "${bold}${red}      \'  ¸,.//      "
-		asciiAddLine "${bold}${red}         ###*¨()     "
+		asciiAddLine "${bld}${C31}         ###*_()     "
+		asciiAddLine "${bld}${C31}      /,  ´¨'\\\      "
+		asciiAddLine "${bld}${C31}    ,$/       |$     "
+		asciiAddLine "${bld}${C31}  ()|(               "
+		asciiAddLine "${bld}${C31}    '$\       |$     "
+		asciiAddLine "${bld}${C31}      \'  ¸,.//      "
+		asciiAddLine "${bld}${C31}         ###*¨()     "
 		space="                     "
 		;;
 	*[Ee]xherbo*)
-		asciiAddLine "${bold}${black}     (\.-~-.o      "
-		asciiAddLine "${bold}${black}     / ${blue}o   O${foreground} \     "
-		asciiAddLine "${bold}${black}     |${brightred}(${foreground}+${brightred}¨\`¨${foreground}*${brightred})${foreground}|     "
-		asciiAddLine "${bold}${black}      \-_:_-/      "
-		asciiAddLine "${bold}${black}   (=/---=== \)    "
-		asciiAddLine "${bold}${black}   _/ -'-´¨¨´  )_  "
-		asciiAddLine "${bold}${black}  | )¨-,_.,-=/´¨/  "
-		asciiAddLine "${bold}${black}   ´'/_/'---'|__|  "
+		asciiAddLine "${bld}${fg}     (\.-~-.o      "
+		asciiAddLine "${bld}${fg}     / ${C34}o   O${fg} \     "
+		asciiAddLine "${bld}${fg}     |${C91}(${fg}+${C91}¨\`¨${fg}*${C91})${fg}|     "
+		asciiAddLine "${bld}${fg}    __\-_:_-/      "
+		asciiAddLine "${bld}${fg}   (_/---=== \)    "
+		asciiAddLine "${bld}${fg}   _/ -'-´¨¨´  )_  "
+		asciiAddLine "${bld}${fg}  | )¨-,_.,-=/´¨/  "
+		asciiAddLine "${bld}${fg}   ´'/_/'---'|__|  "
 		space="                   "
 		;;
 	*[Cc]rux*)
-		asciiAddLine "${bold}${blue}     ,-\"\"-,      "
-		asciiAddLine "${bold}${blue}     |${foreground}+ ^${blue} |      "
-		asciiAddLine "${bold}${blue}     |${yellow}/_\ ${blue}|_     "
-		asciiAddLine "${bold}${blue}   ,'  ${foreground}__${blue}  ,\    "
-		asciiAddLine "${bold}${blue}   | -${foreground}|  \ ${blue}//|   "
-		asciiAddLine "${bold}${yellow}  /¨|${blue}¨-' ${yellow}|${blue}^${yellow}|${blue}¨|   "
-		asciiAddLine "${bold}${yellow}  \_\\${blue}¸${foreground}\__${yellow}\/${blue}_/    ${reset}"
+		asciiAddLine "${bld}${C34}     ,-\"\"-,      "
+		asciiAddLine "${bld}${C34}     |${fg}+ ^${C34} |      "
+		asciiAddLine "${bld}${C34}     |${C33}/_\ ${C34}|_     "
+		asciiAddLine "${bld}${C34}   ,'  ${fg}__${C34}  ,\    "
+		asciiAddLine "${bld}${C34}   | -${fg}|  \ ${C34}//|   "
+		asciiAddLine "${bld}${C33}  /¨|${C34}¨-' ${C33}|${C34}^${C33}|${C34}¨|   "
+		asciiAddLine "${bld}${C33}  \_\\${C34}¸${fg}\__${C33}\/${C34}_/    ${rst}"
 		space="                 "
 		;;
 	*[Gg]uix*)
-		asciiAddLine "${bold}${yellow}\`,'-_._          _._-',\`"
-		asciiAddLine "${bold}${yellow}  '-__ \_      _/ __-'  "
-		asciiAddLine "${bold}${yellow}      \  \    /  /      "
-		asciiAddLine "${bold}${yellow}       \  \  /  /       "
-		asciiAddLine "${bold}${yellow}        \  \/  /        "
-		asciiAddLine "${bold}${yellow}         \ /  /         "
-		asciiAddLine "${bold}${yellow}          V__/          ${reset}"
+		asciiAddLine "${bld}${C33}\`,'-_._          _._-',\`"
+		asciiAddLine "${bld}${C33}  '-__ \_      _/ __-'  "
+		asciiAddLine "${bld}${C33}      \  \    /  /      "
+		asciiAddLine "${bld}${C33}       \  \  /  /       "
+		asciiAddLine "${bld}${C33}        \  \/  /        "
+		asciiAddLine "${bld}${C33}         \ /  /         "
+		asciiAddLine "${bld}${C33}          V__/          ${rst}"
 		space="                        "
 		;;
+	*56*)
+		asciiAddLine "${bold}    /\_/\       "
+		asciiAddLine "${bold}  =/ . . \=     "
+		asciiAddLine "${bold}   \  ^  /      "
+		asciiAddLine "${bold}    |    \   .  "
+		asciiAddLine "${bold}    |     \ /   "
+		asciiAddLine "${bold}    \,|,/ |/    "
+		space="                "
+		;;
 	[Gg]nu)
-		asciiAddLine "${bold}  _-;;==-     -==;;-_ "
-		asciiAddLine "${bold} |\/ _-;*\\\//*;+-.\/|"
-		asciiAddLine "${bold} \\\\\\\\\\^¨''¨V¨''¨^//// "
-		asciiAddLine "${bold}  \\\/     @)  \@) \-  "
-		asciiAddLine "${bold}  / .       ¸_ \|-_\  "
-		asciiAddLine "${bold} /_/;      /*  _,/ ¨- "
-		asciiAddLine "${bold} ¨ | ´,  ´\_-=_=\     "
-		asciiAddLine "${bold}    |  ',  ¨´´´/      "
-		asciiAddLine "${bold}     \   ',   >       "
-		asciiAddLine "${bold}           \#\\\      ${reset}"
+		asciiAddLine "${bld}  _-;;==-     -==;;-_ "
+		asciiAddLine "${bld} |\/ _-;*\\\//*;+-.\/|"
+		asciiAddLine "${bld} \\\\\\\\\\^¨''¨V¨''¨^//// "
+		asciiAddLine "${bld}  \\\/     @)  \@) \-  "
+		asciiAddLine "${bld}  / .       ¸_ \|-_\  "
+		asciiAddLine "${bld} /_/;      /*  _,/ ¨- "
+		asciiAddLine "${bld} ¨ | ´,  ´\_-=_=\     "
+		asciiAddLine "${bld}    |  ',  ¨´´´/      "
+		asciiAddLine "${bld}     \   ',   >       "
+		asciiAddLine "${bld}           \#\\\      ${rst}"
 		space="                      "
 		;;
 	[Dd]ragonfly)
-		asciiAddLine "${bold} [ ¨',  o${red}^${foreground}o  ,'¨ ]  "
-		asciiAddLine "${bold}  ´-¸ '.,${red}#${foreground},.' ¸-´   "
-		asciiAddLine "${bold}  ¸___:=${red}|#|${foreground}=:___¸   "
-		asciiAddLine "${bold} (    ¸~${red}\#/${foreground}~¸    )  "
-		asciiAddLine "${bold}  ´'´    ${red}#${foreground}    ´'´   "
-		asciiAddLine "${bold}${red}         #          "
-		asciiAddLine "${bold}${red}         |          ${reset}"
+		asciiAddLine "${bld} [ ¨',  o${C31}^${fg}o  ,'¨ ]  "
+		asciiAddLine "${bld}  ´-¸ '.,${C31}#${fg},.' ¸-´   "
+		asciiAddLine "${bld}  ¸___:=${C31}|#|${fg}=:___¸   "
+		asciiAddLine "${bld} (    ¸~${C31}\#/${fg}~¸    )  "
+		asciiAddLine "${bld}  ´'´    ${C31}#${fg}    ´'´   "
+		asciiAddLine "${bld}${C31}         #          "
+		asciiAddLine "${bld}${C31}         |          ${rst}"
 		space="                    "
 		;;
 	*[Ff]ree[Bb][Ss][Dd]*)
-		asciiAddLine "${bold}${red}  (^-_-*###*-_-^)   "
-		asciiAddLine "${bold}${red}   \/         \/    "
-		asciiAddLine "${bold}${red}   $   @   @   $    "
-		asciiAddLine "${bold}${red}  |   _______   |   "
-		asciiAddLine "${bold}${red}   $  \ |T| /  $    "
-		asciiAddLine "${bold}${red}    \_ '-_-' _/     "
-		asciiAddLine "${bold}${red}     '-*###*-'      ${reset}"
+		asciiAddLine "${bld}${C31}  (^-_-*###*-_-^)   "
+		asciiAddLine "${bld}${C31}   \/         \/    "
+		asciiAddLine "${bld}${C31}   $   @   @   $    "
+		asciiAddLine "${bld}${C31}  |   _______   |   "
+		asciiAddLine "${bld}${C31}   $  \ |T| /  $    "
+		asciiAddLine "${bld}${C31}    \_ '-_-' _/     "
+		asciiAddLine "${bld}${C31}     '-*###*-'      ${rst}"
 		space="                    "
 		;;
 	*[Oo]pen[Bb][Ss][Dd]*)
-		asciiAddLine "${bold}${yellow}  \,.-|--./      "
-		asciiAddLine "${bold}${yellow}  /',   .  \__   "
-		asciiAddLine "${bold}${yellow} \  .  ${foreground}^  ^${yellow} /    "
-		asciiAddLine "${bold}${yellow} _| . c ${red}U${yellow} ɔ |    "
-		asciiAddLine "${bold}${yellow}  \    .  ,/     "
-		asciiAddLine "${bold}${yellow}  / ,  ,_.\      "
-		asciiAddLine "${bold}${yellow}  '|/\/ '        ${reset}"
+		asciiAddLine "${bld}${C33}  \,.-|--./      "
+		asciiAddLine "${bld}${C33}  /',   .  \__   "
+		asciiAddLine "${bld}${C33} \  .  ${fg}^  ^${C33} /    "
+		asciiAddLine "${bld}${C33} _| . c ${C31}U${C33} ɔ |    "
+		asciiAddLine "${bld}${C33}  \    .  ,/     "
+		asciiAddLine "${bld}${C33}  / ,  ,_.\      "
+		asciiAddLine "${bld}${C33}  '|/\/ '        ${rst}"
 		space="                 "
 		;;
 	*[Nn]et[Bb][Ss][Dd]*)
-		asciiAddLine "${bold} |_\\${red}¨¨-__-¨¨--.__,.--,__     "
-		asciiAddLine "${bold}  |_\\${red}             _-¨-=='¨¨  "  
-		asciiAddLine "${bold}   |_\\${red}           ´´¨-,___    "
-		asciiAddLine "${bold}    |_\\${red}      _¨¨--__--''¨¨¨  "
-		asciiAddLine "${bold}     |_\\${red}--_-¨                "
-		asciiAddLine "${bold}      |_\                    "
-		asciiAddLine "${bold}       |_\                   "
-		asciiAddLine "${bold}        |_\                  ${reset}"
+		asciiAddLine "${bld} |_\\${C31}¨¨-__-¨¨--.__,.--,__     "
+		asciiAddLine "${bld}  |_\\${C31}             _-¨-=='¨¨  "  
+		asciiAddLine "${bld}   |_\\${C31}           ´´¨-,___    "
+		asciiAddLine "${bld}    |_\\${C31}      _¨¨--__--''¨¨¨  "
+		asciiAddLine "${bld}     |_\\${C31}--_-¨                "
+		asciiAddLine "${bld}      |_\                    "
+		asciiAddLine "${bld}       |_\                   "
+		asciiAddLine "${bld}        |_\                  ${rst}"
 		space="                             "
 		;;
 	[Pp]lan9)
-		asciiAddLine "${bold} |#\|#\.---.,     "
-		asciiAddLine "${bold}  \#\^¨      1    "
-		asciiAddLine "${bold}   ],    o   o}   "
-		asciiAddLine "${bold}    |      (*)[   "
-		asciiAddLine "${bold}    }       ¨ |   "
-		asciiAddLine "${bold}  ,.[         /   "
-		asciiAddLine "${bold}  <_\____,\_\-\   ${reset}"
+		asciiAddLine "${bld} |#\|#\.---.,     "
+		asciiAddLine "${bld}  \#\^¨      1    "
+		asciiAddLine "${bld}   ],    o   o}   "
+		asciiAddLine "${bld}    |      (*)[   "
+		asciiAddLine "${bld}    }       ¨ |   "
+		asciiAddLine "${bld}  ,.[         /   "
+		asciiAddLine "${bld}  <_\____,\_\-\   ${rst}"
 		space="                  "
 		;;
 	 [Ss]eele)
-		asciiAddLine "${bold}  ____________  "
-		asciiAddLine "${bold} -#@#-  | -#@#- "
-		asciiAddLine "${bold}   \    |   /   "
-		asciiAddLine "${bold} -#@#-  | -#@#- "
-		asciiAddLine "${bold}     \  | /     "
-		asciiAddLine "${bold} -#@#-\ |/-#@#- "
-		asciiAddLine "${bold}       \/       "
-		asciiAddLine "${bold}          -#@#- "
+		asciiAddLine "${bld}  ____________  "
+		asciiAddLine "${bld} -#@#-  | -#@#- "
+		asciiAddLine "${bld}   \    |   /   "
+		asciiAddLine "${bld} -#@#-  | -#@#- "
+		asciiAddLine "${bld}     \  | /     "
+		asciiAddLine "${bld} -#@#-\ |/-#@#- "
+		asciiAddLine "${bld}       \/       "
+		asciiAddLine "${bld}          -#@#- "
 		space="                "
 		;;
 	[Nn]erv)
-		asciiAddLine "${bold}${red}   ^,  ,_-';,   "
-		asciiAddLine "${bold}${red}    ´\\¸|  , ,'  "
-		asciiAddLine "${bold}${black} |\ | L${red}\\¸  ´;,  "
-		asciiAddLine "${bold}${black} | \| |_${red}´\\¸ ´;  "
-		asciiAddLine "${bold}${black}     |) \ ${red}´\\¸ } "
-		asciiAddLine "${bold}${black}     |\  \/ ${red}´\/ ${reset}"
+		asciiAddLine "${bld}${C31}   ^,  ,_-';,   "
+		asciiAddLine "${bld}${C31}    ´\\¸|  , ,'  "
+		asciiAddLine "${bld}${C30} |\ | L${C31}\\¸  ´;,  "
+		asciiAddLine "${bld}${C30} | \| |_${C31}´\\¸ ´;  "
+		asciiAddLine "${bld}${C30}     |) \ ${C31}´\\¸ } "
+		asciiAddLine "${bld}${C30}     |\  \/ ${C31}´\/ ${rst}"
 		space="                "
 		;;
 	[Nn]avi)
-		asciiAddLine "${bold}${cyan}         .         "
-		asciiAddLine "${bold}${cyan}   . ${blue}_+##\$##+_ ${cyan}.   "
-		asciiAddLine "${bold}${cyan}  / ${blue}/^ ${cyan}+#\$#+ ${blue}^\ ${cyan}\  "
-		asciiAddLine "${bold}${cyan} | ${blue}() ${cyan}#|${blue}(${cyan}@${blue})${cyan}|# ${blue}() ${cyan}| "
-		asciiAddLine "${bold}${cyan}  \ ${blue}\, ${cyan}\' '/ ${blue},/ ${cyan}/  "
-		asciiAddLine "${bold}${cyan} . ' ${blue}¨+${cyan}|${blue}#\$#${cyan}|${blue}+¨ ${cyan}' . "
-		asciiAddLine "${bold}${cyan}      ,|   |,      "
-		asciiAddLine "${bold}${cyan}                   ${reset}"
+		asciiAddLine "${bld}${C36}         .         "
+		asciiAddLine "${bld}${C36}   . ${C34}_+##\$##+_ ${C36}.   "
+		asciiAddLine "${bld}${C36}  / ${C34}/^ ${C36}+#\$#+ ${C34}^\ ${C36}\  "
+		asciiAddLine "${bld}${C36} | ${C34}() ${C36}#|${C34}(${C36}@${C34})${C36}|# ${C34}() ${C36}| "
+		asciiAddLine "${bld}${C36}  \ ${C34}\, ${C36}\' '/ ${C34},/ ${C36}/  "
+		asciiAddLine "${bld}${C36} . ' ${C34}¨+${C36}|${C34}#\$#${C36}|${C34}+¨ ${C36}' . "
+		asciiAddLine "${bld}${C36}      ,|   |,      "
+		asciiAddLine "${bld}${C36}                   ${rst}"
 		space="                   "
 		;;
 	[Aa]perture)
-		asciiAddLine "${bold}${blue}      _-----,_       "
-		asciiAddLine "${bold}${blue}   _¨´¨- _   \ ¨_    "
-		asciiAddLine "${bold}${blue}  /    _--¨-,\   \   "
-		asciiAddLine "${bold}${blue} /--¨;/       | / \  "
-		asciiAddLine "${bold}${blue} |  ,/        /´  |  "
-		asciiAddLine "${bold}${blue} \ / |       /;_--/  "
-		asciiAddLine "${bold}${blue}  \   \'-_--¨    /   "
-		asciiAddLine "${bold}${blue}   ¨_ \   ¨ -_¸_¨    "
-		asciiAddLine "${bold}${blue}      ¨^-----¨       ${reset}"
+		asciiAddLine "${bld}${C34}      _-----,_       "
+		asciiAddLine "${bld}${C34}   _¨´¨- _   \ ¨_    "
+		asciiAddLine "${bld}${C34}  /    _--¨-,\   \   "
+		asciiAddLine "${bld}${C34} /--¨;/       | / \  "
+		asciiAddLine "${bld}${C34} |  ,/        /´  |  "
+		asciiAddLine "${bld}${C34} \ / |       /;_--/  "
+		asciiAddLine "${bld}${C34}  \   \'-_--¨    /   "
+		asciiAddLine "${bld}${C34}   ¨_ \   ¨ -_¸_¨    "
+		asciiAddLine "${bld}${C34}      ¨^-----¨       ${rst}"
 		space="                     "
 		;;
 	[bB]lack[Mm]esa)
-		asciiAddLine "${bold}    _*###*_    "
-		asciiAddLine "${bold}   /       \   "
-		asciiAddLine "${bold}  $         $  "
-		asciiAddLine "${bold} |[   .---. ]| "
-		asciiAddLine "${bold}  \$___|    \\$  "
-		asciiAddLine "${bold}   \_     _/   "
-		asciiAddLine "${bold}     *###*     ${reset}"
+		asciiAddLine "${bld}    _*###*_    "
+		asciiAddLine "${bld}   /       \   "
+		asciiAddLine "${bld}  $         $  "
+		asciiAddLine "${bld} |[   .---. ]| "
+		asciiAddLine "${bld}  \$___|    \\$  "
+		asciiAddLine "${bld}   \_     _/   "
+		asciiAddLine "${bld}     *###*     ${rst}"
 		space="               "
 		;;
 	[Ll]ambda)
 		orange=$(printf '\033[38;5;208m')
-		asciiAddLine "${bold}${orange}    _*###*_    "
-		asciiAddLine "${bold}${orange}   /  _    \   "
-		asciiAddLine "${bold}${orange}  $    \    $  "
-		asciiAddLine "${bold}${orange} |[   / \   ]| "
-		asciiAddLine "${bold}${orange}  $  /   \_ $  "
-		asciiAddLine "${bold}${orange}   \_     _/   "
-		asciiAddLine "${bold}${orange}     *###*     ${reset}"
+		asciiAddLine "${bld}${orange}    _*###*_    "
+		asciiAddLine "${bld}${orange}   /  _    \   "
+		asciiAddLine "${bld}${orange}  $    \    $  "
+		asciiAddLine "${bld}${orange} |[   / \   ]| "
+		asciiAddLine "${bld}${orange}  $  /   \_ $  "
+		asciiAddLine "${bld}${orange}   \_     _/   "
+		asciiAddLine "${bld}${orange}     *###*     ${rst}"
 		space="               "
 		;;
 	*)
 		# this is a trash can btw
-		asciiAddLine "${bold}  ___________  "
-		asciiAddLine "${bold}  \X#X#X#X#X/  "
-		asciiAddLine "${bold}  \#X#X#X#X#/  "
-		asciiAddLine "${bold}  \X#X#X#X#X/  "
-		asciiAddLine "${bold}  \#X#X#X#X#/  "
-		asciiAddLine "${bold}  \X#X#X#X#X/  "
-		asciiAddLine "${bold}  |#X#X#X#X#|  ${reset}"
+		asciiAddLine "${bld}  ___________  "
+		asciiAddLine "${bld}  \X#X#X#X#X/  "
+		asciiAddLine "${bld}  \#X#X#X#X#/  "
+		asciiAddLine "${bld}  \X#X#X#X#X/  "
+		asciiAddLine "${bld}  \#X#X#X#X#/  "
+		asciiAddLine "${bld}  \X#X#X#X#X/  "
+		asciiAddLine "${bld}  |#X#X#X#X#|  ${rst}"
 		space="               "
 		;;
 esac
@@ -921,8 +952,8 @@ done
 		# bedrock
 		# kiss
 	# make more configurable
-	# make logos be 1 instead of 7
+	# make logos be 1 echo instead of current situation
 	# more compatibility for distros
 	# better bsd support
-	# config file instead of this file
-	# logo file instead of this file
+	# separate config file
+	# separate logo file(s)
