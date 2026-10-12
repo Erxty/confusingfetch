@@ -3,12 +3,9 @@ a fetch tool thats.. confused?
 
 ![example](screenshots/normalVoid.png)
 
-> DISCLAIMER!!
-> 
-> All future development will be on my [codeberg](https://codeberg.org/erxty/confusingfetch).
->
-> Another disclaimer:
->
+> DISCLAIMER!!<br>
+> All future development will be on my [codeberg](https://codeberg.org/erxty/confusingfetch).<br><br>
+> Another disclaimer:<br>
 > Development might kinda stop, as i've decided to move on from this silly little project.
 > I might be porting it to C, though, since i'm learning that.
 
