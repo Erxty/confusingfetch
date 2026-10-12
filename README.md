@@ -3,6 +3,15 @@ a fetch tool thats.. confused?
 
 ![example](screenshots/normalVoid.png)
 
+> DISCLAIMER!!
+> 
+> All future development will be on my [codeberg](https://codeberg.org/erxty/confusingfetch).
+>
+> Another disclaimer:
+>
+> Development might kinda stop, as i've decided to move on from this silly little project.
+> I might be porting it to C, though, since i'm learning that.
+
 ## Installation
 
 1. Download the confetch file or copy it to your own
