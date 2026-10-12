@@ -557,12 +557,16 @@ for module in $enabled; do
 		gpu)
 			case "$os" in
 				Linux)
-                gpuNumber=$(lspci -k | grep -Ei "(VGA|3D|DISPLAY)" | awk '{print $1; exit}');
-                if read -r -n1 -d '' < <(lspci -v -s "${gpuNumber}" | awk -F': ' '/Subsystem:/{print $2}' | grep -Ei "RTX|GTX|RX|XT|RADEON"); then
-                    gpu=$(lspci -v -s "${gpuNumber}" | awk -F': ' '/Subsystem:/{print $2}' | grep -Ei "RTX|GTX|RX|XT|RADEON");
-                else    
-                    gpu=$(lspci -v -s "${gpuNumber}" | awk NR==1 | grep -oP '\[.*?\]' | awk NR==1 | sed 's/^.\(.*\).$/\1/');
-                fi
+				if command -v lspci >/dev/null; then
+                	gpuNumber=$(lspci -k | grep -Ei "(VGA|3D|DISPLAY)" | awk '{print $1; exit}');
+                	if read -r -n1 -d '' < <(lspci -v -s "${gpuNumber}" | awk -F': ' '/Subsystem:/{print $2}' | grep -Ei "RTX|GTX|RX|XT|RADEON"); then
+                	    gpu=$(lspci -v -s "${gpuNumber}" | awk -F': ' '/Subsystem:/{print $2}' | grep -Ei "RTX|GTX|RX|XT|RADEON");
+                	else    
+                	    gpu=$(lspci -v -s "${gpuNumber}" | awk NR==1 | grep -oP '\[.*?\]' | awk NR==1 | sed 's/^.\(.*\).$/\1/');
+                	fi
+				else
+					gpu="you don't have one, you poor bastard!!"
+				fi
                 ;;
 				BSD)
 					gpu=$( pciconf -lv | grep -B 4 -F "VGA" | grep -E "^[[:space:]]+device[[:space:]]*=" | cut -d "'" -f2 )
